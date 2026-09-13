@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>UniAssist — Project Overview</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:        #060e0b;
+  --surface:   #0d1f18;
+  --teal:      #00d4a1;
+  --teal-dim:  #00a87f;
+  --teal-glow: rgba(0,212,161,0.13);
+  --cream:     #e8e4d9;
+  --muted:     #6b8f84;
+  --border:    rgba(0,212,161,0.2);
+  --text:      #1a2e28;
+  --text-sub:  #3a5a52;
+  --text-dim:  #5a7a72;
+  --line:      #ddeae4;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 10.5pt; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #eaf2ee;
+  color: var(--text);
+  line-height: 1.75;
+}
+
+/* ── print hint ── */
+.print-hint {
+  position: fixed; top: 0; left: 0; right: 0;
+  background: var(--bg);
+  color: var(--teal);
+  font-size: 10.5px;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 7px 24px;
+  display: flex; align-items: center; gap: 18px;
+  z-index: 9999;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: 0.02em;
+}
+.print-hint strong { color: var(--cream); }
+.print-hint kbd {
+  background: rgba(0,212,161,0.12);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 7px;
+  font-size: 10px;
+  color: var(--teal);
+}
+body { padding-top: 34px; }
+
+@media print {
+  body { background: white; padding-top: 0; }
+  .print-hint { display: none !important; }
+  a { color: inherit !important; text-decoration: none !important; }
+  pre.code-block { page-break-inside: avoid; }
+  table { page-break-inside: avoid; }
+  h1, h2 { page-break-after: avoid; }
+}
+
+@page { size: A4; margin: 0; }
+
+/* ── document ── */
+.document {
+  max-width: 210mm;
+  margin: 0 auto;
+  background: white;
+  box-shadow: 0 4px 80px rgba(0,0,0,0.15);
+}
+
+/* ── cover ── */
+.cover {
+  background: var(--bg);
+  padding: 48px 52px 42px;
+  position: relative;
+  overflow: hidden;
+  min-height: 252px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.cover::before {
+  content: '';
+  position: absolute; top: -100px; right: -100px;
+  width: 380px; height: 380px;
+  background: radial-gradient(circle, rgba(0,212,161,0.18) 0%, transparent 65%);
+  pointer-events: none;
+}
+.cover::after {
+  content: '';
+  position: absolute; bottom: -80px; left: -20px;
+  width: 240px; height: 240px;
+  background: radial-gradient(circle, rgba(0,168,127,0.10) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.cover-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative; z-index: 1;
+}
+
+.logo-img {
+  height: 44px; width: auto; object-fit: contain;
+}
+.logo-fallback {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, var(--teal-dim), var(--teal));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; font-weight: 800;
+  color: var(--bg);
+}
+
+.cover-badge {
+  font-size: 8px; font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--teal);
+  background: rgba(0,212,161,0.09);
+  border: 1px solid var(--border);
+  padding: 4px 12px; border-radius: 4px;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.cover-body {
+  position: relative; z-index: 1;
+  margin-top: 38px;
+}
+
+.cover-eyebrow {
+  font-size: 8.5px; letter-spacing: 0.24em;
+  text-transform: uppercase; color: var(--teal);
+  font-weight: 600; font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 10px;
+}
+
+.cover-title {
+  font-size: 30px; font-weight: 800;
+  color: var(--cream); line-height: 1.12;
+  letter-spacing: -0.025em; margin-bottom: 8px;
+}
+.cover-title .accent { color: var(--teal); }
+
+.cover-subtitle {
+  font-size: 12.5px; color: var(--muted);
+  font-weight: 400; line-height: 1.6;
+}
+
+.cover-footer {
+  position: relative; z-index: 1;
+  margin-top: 38px;
+  border-top: 1px solid var(--border);
+  padding-top: 18px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.cover-meta { display: flex; gap: 36px; }
+.meta-label {
+  font-size: 7.5px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 3px;
+}
+.meta-value {
+  font-size: 10.5px; font-weight: 600; color: var(--cream);
+}
+
+.teal-accent-bar {
+  width: 3px; height: 42px;
+  background: linear-gradient(to bottom, var(--teal), transparent);
+  border-radius: 2px;
+}
+
+/* ── content ── */
+.content {
+  padding: 50px 52px 64px;
+}
+
+/* ── headings ── */
+h1 {
+  font-size: 20px; font-weight: 800;
+  color: var(--text); letter-spacing: -0.02em;
+  margin: 44px 0 14px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--teal);
+  line-height: 1.2;
+}
+h1:first-child { margin-top: 0; }
+
+h2 {
+  font-size: 14px; font-weight: 700;
+  color: var(--text); letter-spacing: -0.01em;
+  margin: 32px 0 10px;
+  display: flex; align-items: center; gap: 10px;
+}
+h2::before {
+  content: '';
+  display: inline-block;
+  width: 4px; height: 15px;
+  background: var(--teal);
+  border-radius: 2px; flex-shrink: 0;
+}
+
+h3 {
+  font-size: 11px; font-weight: 700;
+  color: var(--teal-dim);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 24px 0 8px;
+}
+
+h4 {
+  font-size: 11px; font-weight: 700;
+  color: var(--text);
+  margin: 18px 0 6px;
+}
+
+/* ── body ── */
+p {
+  font-size: 10.5pt; color: var(--text-sub);
+  margin: 0 0 12px; line-height: 1.78;
+}
+strong { color: var(--text); font-weight: 700; }
+em { color: var(--text-dim); }
+a { color: var(--teal-dim); }
+
+/* ── lists ── */
+ul, ol {
+  margin: 6px 0 14px 20px;
+}
+li {
+  font-size: 10.5pt; color: var(--text-sub);
+  line-height: 1.75; margin-bottom: 4px; padding-left: 3px;
+}
+ul li::marker { color: var(--teal); }
+ol li::marker { color: var(--teal); font-weight: 700; }
+
+/* ── hr ── */
+hr {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 30px 0;
+}
+
+/* ── blockquote ── */
+blockquote {
+  border-left: 3px solid var(--teal);
+  background: #f4faf7;
+  margin: 14px 0;
+  padding: 11px 16px;
+  border-radius: 0 6px 6px 0;
+  font-size: 10pt;
+  color: var(--text-dim);
+}
+
+/* ── inline code ── */
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5pt;
+  background: #edf5f0;
+  color: #0a5c40;
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid #cce8d8;
+}
+
+/* ── code block ── */
+pre.code-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 20px;
+  margin: 14px 0 22px;
+  overflow-x: auto;
+}
+pre.code-block::before {
+  content: '';
+  display: block;
+  width: 36px; height: 2px;
+  background: var(--teal);
+  border-radius: 1px;
+  margin-bottom: 12px;
+  opacity: 0.55;
+}
+pre.code-block code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7.8pt;
+  background: none; border: none; padding: 0;
+  color: #9fd4be;
+  white-space: pre;
+  line-height: 1.65;
+}
+
+/* ── tables ── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0 22px;
+  font-size: 9.5pt;
+}
+thead { background: var(--bg); }
+thead th {
+  color: var(--teal);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7.5pt; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 10px 14px; text-align: left;
+  border-bottom: 2px solid var(--teal-dim);
+}
+tbody tr { border-bottom: 1px solid var(--line); }
+tbody tr:nth-child(even) { background: #f8fcfa; }
+tbody td {
+  padding: 9px 14px;
+  color: var(--text-sub);
+  vertical-align: top;
+}
+tbody td code { font-size: 8pt; }
+
+/* ── footer strip ── */
+.doc-footer {
+  background: var(--bg);
+  padding: 14px 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--border);
+}
+.footer-left {
+  font-size: 8px; color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.1em;
+}
+.footer-right {
+  font-size: 8px; color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.08em;
+}
+.footer-teal { color: var(--teal); }
+</style>
+</head>
+<body>
+
+<div class="print-hint">
+  <strong>PDF Export Ready</strong>
+  <span>Press</span>
+  <kbd>Ctrl + P</kbd>
+  <span>→ Save as PDF &nbsp;·&nbsp; Paper: A4 &nbsp;·&nbsp; Margins: None &nbsp;·&nbsp; ✔ Background graphics</span>
+</div>
+
+<div class="document">
+
+  <!-- Cover -->
+  <div class="cover">
+    <div class="cover-top">
+      <div class="logo-fallback">B</div>
+      <span class="cover-badge">General Overview</span>
+    </div>
+    <div class="cover-body">
+      <div class="cover-eyebrow">UniAssist · Balerioncodes</div>
+      <div class="cover-title">Project Overview</div>
+      <div class="cover-subtitle">What we are building, who it is for, and what success looks like at the end of development.</div>
+    </div>
+    <div class="cover-footer">
+      <div class="cover-meta">
+        <div>
+          <div class="meta-label">Team</div>
+          <div class="meta-value">Balerioncodes</div>
+        </div>
+        <div>
+          <div class="meta-label">Version</div>
+          <div class="meta-value">1.0</div>
+        </div>
+        <div>
+          <div class="meta-label">Year</div>
+          <div class="meta-value">2026</div>
+        </div>
+      </div>
+      <div class="teal-accent-bar"></div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="content">
+    <h1>UniAssist — Project Overview</h1>
+
+<p><strong>Project:</strong> UniAssist  </p>
+<p><strong>Team:</strong> Balerioncodes  </p>
+<p><strong>Document Version:</strong> 1.0  </p>
+<p><strong>Year:</strong> 2026  </p>
+
+<hr>
+
+<h2>What We Are Building</h2>
+
+<p>UniAssist is a student support platform. The goal is simple: give students one place to get help with anything academic, technical, or project-related — without the confusion of chasing people across WhatsApp, email, or social media.</p>
+
+<p>A student logs in, describes what they need, uploads any relevant files, and submits a request. The UniAssist team reviews it, sends a quote, the student pays, and work begins. The student can track everything — status, messages, files, and deliverables — from a single dashboard.</p>
+
+<p>It is not a tutoring marketplace. It is not a freelancing platform. It is a managed support service where the UniAssist team handles everything directly.</p>
+
+<hr>
+
+<h2>The Problem We Are Solving</h2>
+
+<p>Students regularly need support that falls outside what their institution provides:</p>
+
+<ul>
+<li>A deadline is approaching and they are stuck on a programming assignment</li>
+<li>They need help structuring a research paper</li>
+<li>Their development environment is broken and they do not know why</li>
+<li>They are building a final-year project and have no one to guide them</li>
+<li>They need past questions or study materials in one place</li>
+</ul>
+
+<p>The current alternatives are unreliable — asking friends, searching forums, hiring random freelancers with no accountability, or simply giving up. There is no structured, trustworthy, student-focused service that handles all of this in one place.</p>
+
+<p>UniAssist fills that gap.</p>
+
+<hr>
+
+<h2>Who It Is For</h2>
+
+<h3>Students</h3>
+<p>The primary users. Students submit requests, communicate with the team, make payments, and receive support. The platform should feel effortless for them — clean, fast, and reassuring.</p>
+
+<h3>The UniAssist Team</h3>
+<p>The internal team manages every request from submission to completion. They review requests, assign work, create quotes, communicate with students, upload deliverables, and track everything through the admin dashboard.</p>
+
+<h3>Visitors</h3>
+<p>People who land on the platform without an account. The public website explains what UniAssist does and converts them into registered students.</p>
+
+<hr>
+
+<h2>What the Platform Will Do</h2>
+
+<h3>For Students</h3>
+
+<ul>
+<li>Create a detailed support request in a step-by-step guided form</li>
+<li>Upload files, specify deadlines, and describe the problem clearly</li>
+<li>Receive a quote from the team and accept or decline it</li>
+<li>Pay securely through the platform</li>
+<li>Track request progress through a full status timeline</li>
+<li>Communicate directly with the assigned team member</li>
+<li>Receive and download completed deliverables</li>
+<li>Browse a resource library of study materials, guides, and past questions</li>
+<li>Get notifications for every update without having to check manually</li>
+</ul>
+
+<h3>For the UniAssist Team</h3>
+
+<ul>
+<li>View and manage every request from a central admin dashboard</li>
+<li>Search, filter, and sort requests by status, category, urgency, and deadline</li>
+<li>Assign requests to team members</li>
+<li>Create and send quotes to students</li>
+<li>Update request status at each stage</li>
+<li>Communicate with students through per-request messaging</li>
+<li>Upload deliverables when work is complete</li>
+<li>Monitor revenue, payments, and team workload</li>
+<li>Manage the resource library</li>
+<li>View platform analytics</li>
+</ul>
+
+<hr>
+
+<h2>How It Works — End to End</h2>
+
+<pre class="code-block"><code>Student registers and verifies their email
+        ↓
+Student submits a request (category, description, deadline, files)
+        ↓
+Request enters the queue as SUBMITTED
+        ↓
+Admin reviews the request → status: UNDER REVIEW
+        ↓
+Admin creates a quote (price, timeline, scope)
+        ↓
+Student receives notification → reviews and accepts the quote
+        ↓
+Student makes payment through Paystack
+        ↓
+Payment confirmed by webhook → status: PAID
+        ↓
+Admin assigns request to a team member → status: ASSIGNED
+        ↓
+Work begins → status: IN PROGRESS
+        ↓
+Team submits for internal review → status: REVIEW
+        ↓
+Admin marks complete, uploads deliverables → status: COMPLETED
+        ↓
+Student downloads deliverables, request closes → CLOSED</code></pre>
+
+<p>Throughout this entire flow, the student and team can message each other inside the platform. Every status change is logged and visible on the request timeline.</p>
+
+<hr>
+
+<h2>What the Finished Product Looks Like</h2>
+
+<h3>Public Website</h3>
+<p>A clean, professional landing page that communicates the product clearly. Sections for services, how it works, testimonials, and a strong call to action. No clutter. No generic template styling. It should feel like a modern SaaS company, not a university portal.</p>
+
+<h3>Student Application</h3>
+<p>A focused dashboard where students can see all their active requests at a glance, create new ones, track progress, chat with the team, and manage payments. Every screen is responsive and works properly on mobile.</p>
+
+<h3>Admin Application</h3>
+<p>A powerful but clean internal dashboard. The team can manage the full request queue, monitor workload, handle payments, and communicate with students — all without needing any external tools.</p>
+
+<hr>
+
+<h2>The Technology Foundation</h2>
+
+<p>The platform is built to be maintainable, scalable, and cost-effective for a small team.</p>
+
+<table><thead><tr><th>Layer</th><th>Choice</th><th>Reason</th></tr></thead><tbody>
+<tr><td>Frontend</td><td>React + TypeScript + Vite</td><td>Fast, modern, strongly typed</td></tr>
+<tr><td>Styling</td><td>Tailwind CSS + shadcn/ui</td><td>Consistent design with minimal overhead</td></tr>
+<tr><td>Backend</td><td>Supabase</td><td>Managed Postgres, auth, storage, realtime, and serverless functions in one platform</td></tr>
+<tr><td>Payments</td><td>Paystack</td><td>Reliable payment processing for the target market</td></tr>
+<tr><td>Deployment</td><td>Vercel + Supabase Cloud</td><td>Simple, scalable, low-maintenance hosting</td></tr>
+</tbody></table>
+
+<p>There is no custom API server to maintain. Business logic that requires elevated privileges or third-party service calls runs through Supabase Edge Functions. Security is enforced at the database level through Row Level Security policies.</p>
+
+<hr>
+
+<h2>Development Phases</h2>
+
+<h3>Phase 1 — Frontend Design (Current)</h3>
+<p>Three developers independently build the full frontend using shared specifications. This produces three different visual interpretations of the same product. The strongest design is selected by team vote.</p>
+
+<h3>Phase 2 — Frontend Selection</h3>
+<p>The team reviews all three implementations and votes. The selected frontend becomes the official codebase going forward.</p>
+
+<h3>Phase 3 — Backend Development</h3>
+<p>The full team builds the Supabase backend together — database schema, RLS policies, Edge Functions, storage, and Realtime. This phase connects the real data layer to the winning frontend.</p>
+
+<h3>Phase 4 — Integration</h3>
+<p>The selected frontend is connected to the production backend. Mock data is replaced with real Supabase queries. All services (auth, payments, messaging, notifications, file storage) are wired up and tested end to end.</p>
+
+<h3>Phase 5 — Launch</h3>
+<p>The platform is deployed to production. Real students can register and submit requests. The team begins fulfilling requests through the admin dashboard.</p>
+
+<hr>
+
+<h2>Quality Standards</h2>
+
+<p>The platform must meet these standards before launch:</p>
+
+<ul>
+<li><strong>Responsive</strong> — fully functional on desktop, tablet, and mobile</li>
+<li><strong>Fast</strong> — pages load quickly, dashboards do not lag</li>
+<li><strong>Secure</strong> — no data leaks across users, payment confirmation only via server-side webhook</li>
+<li><strong>Reliable</strong> — requests, payments, and messages do not fail silently</li>
+<li><strong>Accessible</strong> — readable contrast, keyboard navigability, clear error states</li>
+<li><strong>Maintainable</strong> — clean code structure that any team member can work in without a lengthy onboarding</li>
+</ul>
+
+<hr>
+
+<h2>What Success Looks Like</h2>
+
+<p>At the end of development, we have a platform where:</p>
+
+<ul>
+<li>A student can sign up, submit a request, pay, and receive completed work entirely within UniAssist — without a single external message or file exchange</li>
+<li>The team can manage their full workload from the admin dashboard without needing spreadsheets, WhatsApp threads, or manual tracking</li>
+<li>The codebase is clean enough that new features can be added without breaking what already works</li>
+<li>The platform is live, stable, and actively serving real students</li>
+</ul>
+
+<p>That is the goal. Everything in the technical documentation exists to support it.</p>
+
+<hr>
+
+<p><em>Document maintained by Balerioncodes.</em></p>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="doc-footer">
+    <span class="footer-left">UNIASSIST &nbsp;·&nbsp; <span class="footer-teal">BALERIONCODES</span> &nbsp;·&nbsp; PROJECT OVERVIEW</span>
+    <span class="footer-right">DOC v1.0 &nbsp;·&nbsp; 2026</span>
+  </div>
+
+</div>
+</body>
+</html>

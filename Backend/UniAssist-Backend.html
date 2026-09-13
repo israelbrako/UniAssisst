@@ -1,0 +1,2223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>UniAssist — Backend Specification</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:        #060e0b;
+  --surface:   #0d1f18;
+  --teal:      #00d4a1;
+  --teal-dim:  #00a87f;
+  --teal-glow: rgba(0,212,161,0.13);
+  --cream:     #e8e4d9;
+  --muted:     #6b8f84;
+  --border:    rgba(0,212,161,0.2);
+  --text:      #1a2e28;
+  --text-sub:  #3a5a52;
+  --text-dim:  #5a7a72;
+  --line:      #ddeae4;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 10.5pt; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #eaf2ee;
+  color: var(--text);
+  line-height: 1.75;
+}
+
+/* ── print hint ── */
+.print-hint {
+  position: fixed; top: 0; left: 0; right: 0;
+  background: var(--bg);
+  color: var(--teal);
+  font-size: 10.5px;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 7px 24px;
+  display: flex; align-items: center; gap: 18px;
+  z-index: 9999;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: 0.02em;
+}
+.print-hint strong { color: var(--cream); }
+.print-hint kbd {
+  background: rgba(0,212,161,0.12);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 7px;
+  font-size: 10px;
+  color: var(--teal);
+}
+body { padding-top: 34px; }
+
+@media print {
+  body { background: white; padding-top: 0; }
+  .print-hint { display: none !important; }
+  a { color: inherit !important; text-decoration: none !important; }
+  pre.code-block { page-break-inside: avoid; }
+  table { page-break-inside: avoid; }
+  h1, h2 { page-break-after: avoid; }
+}
+
+@page { size: A4; margin: 0; }
+
+/* ── document ── */
+.document {
+  max-width: 210mm;
+  margin: 0 auto;
+  background: white;
+  box-shadow: 0 4px 80px rgba(0,0,0,0.15);
+}
+
+/* ── cover ── */
+.cover {
+  background: var(--bg);
+  padding: 48px 52px 42px;
+  position: relative;
+  overflow: hidden;
+  min-height: 252px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.cover::before {
+  content: '';
+  position: absolute; top: -100px; right: -100px;
+  width: 380px; height: 380px;
+  background: radial-gradient(circle, rgba(0,212,161,0.18) 0%, transparent 65%);
+  pointer-events: none;
+}
+.cover::after {
+  content: '';
+  position: absolute; bottom: -80px; left: -20px;
+  width: 240px; height: 240px;
+  background: radial-gradient(circle, rgba(0,168,127,0.10) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.cover-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative; z-index: 1;
+}
+
+.logo-img {
+  height: 44px; width: auto; object-fit: contain;
+}
+.logo-fallback {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, var(--teal-dim), var(--teal));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; font-weight: 800;
+  color: var(--bg);
+}
+
+.cover-badge {
+  font-size: 8px; font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--teal);
+  background: rgba(0,212,161,0.09);
+  border: 1px solid var(--border);
+  padding: 4px 12px; border-radius: 4px;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.cover-body {
+  position: relative; z-index: 1;
+  margin-top: 38px;
+}
+
+.cover-eyebrow {
+  font-size: 8.5px; letter-spacing: 0.24em;
+  text-transform: uppercase; color: var(--teal);
+  font-weight: 600; font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 10px;
+}
+
+.cover-title {
+  font-size: 30px; font-weight: 800;
+  color: var(--cream); line-height: 1.12;
+  letter-spacing: -0.025em; margin-bottom: 8px;
+}
+.cover-title .accent { color: var(--teal); }
+
+.cover-subtitle {
+  font-size: 12.5px; color: var(--muted);
+  font-weight: 400; line-height: 1.6;
+}
+
+.cover-footer {
+  position: relative; z-index: 1;
+  margin-top: 38px;
+  border-top: 1px solid var(--border);
+  padding-top: 18px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.cover-meta { display: flex; gap: 36px; }
+.meta-label {
+  font-size: 7.5px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 3px;
+}
+.meta-value {
+  font-size: 10.5px; font-weight: 600; color: var(--cream);
+}
+
+.teal-accent-bar {
+  width: 3px; height: 42px;
+  background: linear-gradient(to bottom, var(--teal), transparent);
+  border-radius: 2px;
+}
+
+/* ── content ── */
+.content {
+  padding: 50px 52px 64px;
+}
+
+/* ── headings ── */
+h1 {
+  font-size: 20px; font-weight: 800;
+  color: var(--text); letter-spacing: -0.02em;
+  margin: 44px 0 14px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--teal);
+  line-height: 1.2;
+}
+h1:first-child { margin-top: 0; }
+
+h2 {
+  font-size: 14px; font-weight: 700;
+  color: var(--text); letter-spacing: -0.01em;
+  margin: 32px 0 10px;
+  display: flex; align-items: center; gap: 10px;
+}
+h2::before {
+  content: '';
+  display: inline-block;
+  width: 4px; height: 15px;
+  background: var(--teal);
+  border-radius: 2px; flex-shrink: 0;
+}
+
+h3 {
+  font-size: 11px; font-weight: 700;
+  color: var(--teal-dim);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 24px 0 8px;
+}
+
+h4 {
+  font-size: 11px; font-weight: 700;
+  color: var(--text);
+  margin: 18px 0 6px;
+}
+
+/* ── body ── */
+p {
+  font-size: 10.5pt; color: var(--text-sub);
+  margin: 0 0 12px; line-height: 1.78;
+}
+strong { color: var(--text); font-weight: 700; }
+em { color: var(--text-dim); }
+a { color: var(--teal-dim); }
+
+/* ── lists ── */
+ul, ol {
+  margin: 6px 0 14px 20px;
+}
+li {
+  font-size: 10.5pt; color: var(--text-sub);
+  line-height: 1.75; margin-bottom: 4px; padding-left: 3px;
+}
+ul li::marker { color: var(--teal); }
+ol li::marker { color: var(--teal); font-weight: 700; }
+
+/* ── hr ── */
+hr {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 30px 0;
+}
+
+/* ── blockquote ── */
+blockquote {
+  border-left: 3px solid var(--teal);
+  background: #f4faf7;
+  margin: 14px 0;
+  padding: 11px 16px;
+  border-radius: 0 6px 6px 0;
+  font-size: 10pt;
+  color: var(--text-dim);
+}
+
+/* ── inline code ── */
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5pt;
+  background: #edf5f0;
+  color: #0a5c40;
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid #cce8d8;
+}
+
+/* ── code block ── */
+pre.code-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 20px;
+  margin: 14px 0 22px;
+  overflow-x: auto;
+}
+pre.code-block::before {
+  content: '';
+  display: block;
+  width: 36px; height: 2px;
+  background: var(--teal);
+  border-radius: 1px;
+  margin-bottom: 12px;
+  opacity: 0.55;
+}
+pre.code-block code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7.8pt;
+  background: none; border: none; padding: 0;
+  color: #9fd4be;
+  white-space: pre;
+  line-height: 1.65;
+}
+
+/* ── tables ── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0 22px;
+  font-size: 9.5pt;
+}
+thead { background: var(--bg); }
+thead th {
+  color: var(--teal);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7.5pt; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 10px 14px; text-align: left;
+  border-bottom: 2px solid var(--teal-dim);
+}
+tbody tr { border-bottom: 1px solid var(--line); }
+tbody tr:nth-child(even) { background: #f8fcfa; }
+tbody td {
+  padding: 9px 14px;
+  color: var(--text-sub);
+  vertical-align: top;
+}
+tbody td code { font-size: 8pt; }
+
+/* ── footer strip ── */
+.doc-footer {
+  background: var(--bg);
+  padding: 14px 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--border);
+}
+.footer-left {
+  font-size: 8px; color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.1em;
+}
+.footer-right {
+  font-size: 8px; color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.08em;
+}
+.footer-teal { color: var(--teal); }
+</style>
+</head>
+<body>
+
+<div class="print-hint">
+  <strong>PDF Export Ready</strong>
+  <span>Press</span>
+  <kbd>Ctrl + P</kbd>
+  <span>→ Save as PDF &nbsp;·&nbsp; Paper: A4 &nbsp;·&nbsp; Margins: None &nbsp;·&nbsp; ✔ Background graphics</span>
+</div>
+
+<div class="document">
+
+  <!-- Cover -->
+  <div class="cover">
+    <div class="cover-top">
+      <div class="logo-fallback">B</div>
+      <span class="cover-badge">Backend Docs</span>
+    </div>
+    <div class="cover-body">
+      <div class="cover-eyebrow">UniAssist · Balerioncodes</div>
+      <div class="cover-title">Backend Specification</div>
+      <div class="cover-subtitle">Supabase setup, database schema, RLS policies, Edge Functions, payments, and deployment.</div>
+    </div>
+    <div class="cover-footer">
+      <div class="cover-meta">
+        <div>
+          <div class="meta-label">Team</div>
+          <div class="meta-value">Balerioncodes</div>
+        </div>
+        <div>
+          <div class="meta-label">Version</div>
+          <div class="meta-value">1.0</div>
+        </div>
+        <div>
+          <div class="meta-label">Year</div>
+          <div class="meta-value">2026</div>
+        </div>
+      </div>
+      <div class="teal-accent-bar"></div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="content">
+    <h1>UniAssist — Backend Documentation</h1>
+
+<p><strong>Project:</strong> UniAssist  </p>
+<p><strong>Team:</strong> Balerioncodes  </p>
+<p><strong>Document Version:</strong> 1.0  </p>
+<p><strong>Year:</strong> 2026  </p>
+<p><strong>Stage:</strong> Backend Architecture &amp; Development Reference  </p>
+
+<hr>
+
+<h2>Table of Contents</h2>
+
+<ol>
+<li><a href="#1-overview">Overview</a></li>
+<li><a href="#2-technology-stack">Technology Stack</a></li>
+<li><a href="#3-supabase-project-setup">Supabase Project Setup</a></li>
+<li><a href="#4-environment-variables">Environment Variables</a></li>
+<li><a href="#5-database-schema">Database Schema</a></li>
+<li><a href="#6-row-level-security-rls">Row Level Security (RLS)</a></li>
+<li><a href="#7-authentication">Authentication</a></li>
+<li><a href="#8-storage">Storage</a></li>
+<li><a href="#9-edge-functions">Edge Functions</a></li>
+<li><a href="#10-realtime">Realtime</a></li>
+<li><a href="#11-api-design-reference">API Design Reference</a></li>
+<li><a href="#12-payment-integration--paystack">Payment Integration — Paystack</a></li>
+<li><a href="#13-notifications-system">Notifications System</a></li>
+<li><a href="#14-request-lifecycle">Request Lifecycle</a></li>
+<li><a href="#15-email-system">Email System</a></li>
+<li><a href="#16-role--permission-model">Role &amp; Permission Model</a></li>
+<li><a href="#17-file-management">File Management</a></li>
+<li><a href="#18-admin-operations">Admin Operations</a></li>
+<li><a href="#19-security-guidelines">Security Guidelines</a></li>
+<li><a href="#20-error-handling-standards">Error Handling Standards</a></li>
+<li><a href="#21-database-indexes--performance">Database Indexes &amp; Performance</a></li>
+<li><a href="#22-deployment">Deployment</a></li>
+<li><a href="#23-backend-integration-checklist">Backend Integration Checklist</a></li>
+</ol>
+
+<hr>
+
+<h2>1. Overview</h2>
+
+<p>The UniAssist backend is powered entirely by <strong>Supabase</strong>, which provides:</p>
+
+<ul>
+<li><strong>PostgreSQL</strong> — the primary relational database</li>
+<li><strong>Supabase Auth</strong> — authentication and session management</li>
+<li><strong>Supabase Storage</strong> — file uploads (request attachments, deliverables, resources)</li>
+<li><strong>Supabase Realtime</strong> — live messaging and notification delivery</li>
+<li><strong>Supabase Edge Functions</strong> — server-side logic (payment webhooks, email triggers, quote creation, business rules)</li>
+</ul>
+
+<p>There is no separate Node.js/Express server. All backend logic runs either directly through Supabase's client library (with RLS enforcing security) or through Edge Functions for operations that require elevated privileges or third-party service calls.</p>
+
+<h3>Why Supabase</h3>
+
+<ul>
+<li>Removes the need to build and maintain a separate API server during the early product stage</li>
+<li>PostgreSQL gives full relational power with foreign keys, constraints, and triggers</li>
+<li>RLS makes it safe to call the database directly from the frontend without exposing data across users</li>
+<li>Realtime works out of the box with the existing database — no additional infrastructure</li>
+<li>Edge Functions allow custom server logic without managing servers</li>
+</ul>
+
+<hr>
+
+<h2>2. Technology Stack</h2>
+
+<table><thead><tr><th>Concern</th><th>Tool</th></tr></thead><tbody>
+<tr><td>Platform</td><td>Supabase (hosted)</td></tr>
+<tr><td>Database</td><td>PostgreSQL 15+ (via Supabase)</td></tr>
+<tr><td>Authentication</td><td>Supabase Auth (email/password + magic link)</td></tr>
+<tr><td>File Storage</td><td>Supabase Storage</td></tr>
+<tr><td>Server Logic</td><td>Supabase Edge Functions (Deno runtime)</td></tr>
+<tr><td>Realtime</td><td>Supabase Realtime (Postgres Changes)</td></tr>
+<tr><td>Payments</td><td>Paystack</td></tr>
+<tr><td>Email</td><td>Supabase Auth emails + Resend (transactional)</td></tr>
+<tr><td>Deployment</td><td>Supabase Cloud</td></tr>
+<tr><td>CLI</td><td>Supabase CLI</td></tr>
+<tr><td>Migrations</td><td>Supabase Migrations (SQL files)</td></tr>
+<tr><td>Frontend Connection</td><td><code>@supabase/supabase-js</code> v2</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>3. Supabase Project Setup</h2>
+
+<h3>Step 1 — Create Project</h3>
+
+<ol>
+<li>Go to <a href="https://supabase.com">supabase.com</a></li>
+<li>Create a new organization: <code>Balerioncodes</code></li>
+<li>Create a new project: <code>uniassist-production</code></li>
+<li>Choose a strong database password — store it securely</li>
+<li>Select the closest region to your target users</li>
+</ol>
+
+<h3>Step 2 — Install Supabase CLI</h3>
+
+<pre class="code-block"><code>npm install -g supabase
+supabase login
+supabase init          # run inside your project repo
+supabase link --project-ref &lt;your-project-ref&gt;</code></pre>
+
+<h3>Step 3 — Local Development</h3>
+
+<pre class="code-block"><code>supabase start         # starts local Supabase stack (Docker required)
+supabase db reset      # applies all migrations from scratch
+supabase db diff       # shows pending schema changes
+supabase migration new &lt;name&gt;   # creates a new migration file
+supabase db push       # pushes migrations to linked remote project</code></pre>
+
+<h3>Step 4 — Frontend Client Setup</h3>
+
+<pre class="code-block"><code>// src/lib/supabase.ts
+import { createClient } from '@supabase/supabase-js'
+import { Database } from '@/types/supabase'  // generated types
+
+export const supabase = createClient&lt;Database&gt;(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+)</code></pre>
+
+<p>Generate TypeScript types from your schema:</p>
+
+<pre class="code-block"><code>supabase gen types typescript --project-id &lt;ref&gt; &gt; src/types/supabase.ts</code></pre>
+
+<p>Regenerate this file every time the schema changes.</p>
+
+<hr>
+
+<h2>4. Environment Variables</h2>
+
+<h3>Frontend (Vite) — <code>.env</code></h3>
+
+<pre class="code-block"><code>VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_PAYSTACK_PUBLIC_KEY=pk_live_xxxxxxxxxxxx</code></pre>
+
+<blockquote>The anon key is safe to expose in the frontend. It is not a secret. Security is enforced by RLS policies, not by hiding this key.</blockquote>
+
+<h3>Edge Functions — Supabase Secrets</h3>
+
+<p>Set these via the Supabase dashboard or CLI. Never put these in frontend <code>.env</code>.</p>
+
+<pre class="code-block"><code>supabase secrets set PAYSTACK_SECRET_KEY=sk_live_xxxxxxxxxxxx
+supabase secrets set RESEND_API_KEY=re_xxxxxxxxxxxx
+supabase secrets set SUPABASE_SERVICE_ROLE_KEY=your-service-role-key</code></pre>
+
+<blockquote>The service role key bypasses RLS. It must only ever be used inside Edge Functions, never in the frontend.</blockquote>
+
+<hr>
+
+<h2>5. Database Schema</h2>
+
+<p>All tables use UUIDs as primary keys. All tables include <code>created_at</code> and <code>updated_at</code> timestamps. <code>updated_at</code> is automatically maintained by a trigger.</p>
+
+<h3>5.1 <code>profiles</code> table</h3>
+
+<p>Extends the Supabase <code>auth.users</code> table. Created automatically on user registration via a trigger.</p>
+
+<pre class="code-block"><code>CREATE TABLE profiles (
+  id              UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  full_name       TEXT NOT NULL,
+  email           TEXT NOT NULL,
+  phone           TEXT,
+  university      TEXT,
+  department      TEXT,
+  level           TEXT,
+  student_id      TEXT,
+  avatar_url      TEXT,
+  role            TEXT NOT NULL DEFAULT 'student'
+                  CHECK (role IN ('student', 'admin', 'staff')),
+  is_active       BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);</code></pre>
+
+<p><strong>Trigger — auto-create profile on signup:</strong></p>
+
+<pre class="code-block"><code>CREATE OR REPLACE FUNCTION handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO profiles (id, full_name, email)
+  VALUES (
+    NEW.id,
+    NEW.raw_user_meta_data-&gt;&gt;'full_name',
+    NEW.email
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION handle_new_user();</code></pre>
+
+<hr>
+
+<h3>5.2 <code>service_categories</code> table</h3>
+
+<pre class="code-block"><code>CREATE TABLE service_categories (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name        TEXT NOT NULL UNIQUE,
+  slug        TEXT NOT NULL UNIQUE,
+  description TEXT,
+  icon        TEXT,
+  is_active   BOOLEAN NOT NULL DEFAULT TRUE,
+  sort_order  INTEGER DEFAULT 0,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Seed data
+INSERT INTO service_categories (name, slug, description) VALUES
+  ('Academic Support',    'academic',   'Tutoring, exam prep, research, writing, proofreading'),
+  ('Technical Support',   'technical',  'Software, debugging, Git, databases, environments'),
+  ('Project Support',     'project',    'Consultation, architecture, development, deployment'),
+  ('Research &amp; Writing',  'research',   'Research guidance, citations, academic writing'),
+  ('Resources',           'resources',  'Study materials, guides, past questions');</code></pre>
+
+<hr>
+
+<h3>5.3 <code>requests</code> table</h3>
+
+<p>The central table of the entire application.</p>
+
+<pre class="code-block"><code>CREATE TYPE request_status AS ENUM (
+  'DRAFT',
+  'SUBMITTED',
+  'UNDER_REVIEW',
+  'QUOTED',
+  'AWAITING_PAYMENT',
+  'PAID',
+  'ASSIGNED',
+  'IN_PROGRESS',
+  'REVIEW',
+  'COMPLETED',
+  'CLOSED',
+  'CANCELLED',
+  'REJECTED',
+  'DISPUTED'
+);
+
+CREATE TYPE request_urgency AS ENUM (
+  'LOW',
+  'NORMAL',
+  'HIGH',
+  'URGENT'
+);
+
+CREATE TABLE requests (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  reference       TEXT NOT NULL UNIQUE,     -- e.g. REQ-10482
+  student_id      UUID NOT NULL REFERENCES profiles(id) ON DELETE RESTRICT,
+  category_id     UUID NOT NULL REFERENCES service_categories(id),
+  title           TEXT NOT NULL,
+  description     TEXT NOT NULL,
+  subject         TEXT,
+  department      TEXT,
+  technology      TEXT,
+  deadline        DATE NOT NULL,
+  urgency         request_urgency NOT NULL DEFAULT 'NORMAL',
+  status          request_status NOT NULL DEFAULT 'DRAFT',
+  assigned_to     UUID REFERENCES profiles(id),
+  progress        SMALLINT DEFAULT 0 CHECK (progress &gt;= 0 AND progress &lt;= 100),
+  internal_notes  TEXT,                     -- admin-only notes, never shown to student
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);</code></pre>
+
+<p><strong>Reference number generator:</strong></p>
+
+<pre class="code-block"><code>CREATE SEQUENCE request_ref_seq START 10000;
+
+CREATE OR REPLACE FUNCTION generate_request_reference()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.reference := 'REQ-' || nextval('request_ref_seq')::TEXT;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER set_request_reference
+  BEFORE INSERT ON requests
+  FOR EACH ROW EXECUTE FUNCTION generate_request_reference();</code></pre>
+
+<hr>
+
+<h3>5.4 <code>request_status_history</code> table</h3>
+
+<p>Records every status change for the timeline view.</p>
+
+<pre class="code-block"><code>CREATE TABLE request_status_history (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  request_id  UUID NOT NULL REFERENCES requests(id) ON DELETE CASCADE,
+  old_status  request_status,
+  new_status  request_status NOT NULL,
+  changed_by  UUID REFERENCES profiles(id),
+  note        TEXT,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);</code></pre>
+
+<p><strong>Trigger — auto-log status changes:</strong></p>
+
+<pre class="code-block"><code>CREATE OR REPLACE FUNCTION log_request_status_change()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF OLD.status IS DISTINCT FROM NEW.status THEN
+    INSERT INTO request_status_history (request_id, old_status, new_status)
+    VALUES (NEW.id, OLD.status, NEW.status);
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER on_request_status_change
+  AFTER UPDATE ON requests
+  FOR EACH ROW EXECUTE FUNCTION log_request_status_change();</code></pre>
+
+<hr>
+
+<h3>5.5 <code>quotes</code> table</h3>
+
+<pre class="code-block"><code>CREATE TYPE quote_status AS ENUM (
+  'PENDING',
+  'ACCEPTED',
+  'DECLINED',
+  'EXPIRED'
+);
+
+CREATE TABLE quotes (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  request_id        UUID NOT NULL UNIQUE REFERENCES requests(id) ON DELETE CASCADE,
+  created_by        UUID NOT NULL REFERENCES profiles(id),
+  service_summary   TEXT NOT NULL,
+  description       TEXT,
+  price             NUMERIC(10, 2) NOT NULL CHECK (price &gt; 0),
+  currency          TEXT NOT NULL DEFAULT 'NGN',
+  estimated_days    INTEGER,
+  included_items    TEXT[],
+  additional_notes  TEXT,
+  status            quote_status NOT NULL DEFAULT 'PENDING',
+  expires_at        TIMESTAMPTZ,
+  responded_at      TIMESTAMPTZ,
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);</code></pre>
+
+<p>When a quote is accepted, an Edge Function updates the request status to <code>AWAITING_PAYMENT</code> and creates a payment record.</p>
+
+<hr>
+
+<h3>5.6 <code>payments</code> table</h3>
+
+<pre class="code-block"><code>CREATE TYPE payment_status AS ENUM (
+  'PENDING',
+  'PROCESSING',
+  'SUCCESSFUL',
+  'FAILED',
+  'REFUNDED',
+  'DISPUTED'
+);
+
+CREATE TABLE payments (
+  id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  request_id            UUID NOT NULL REFERENCES requests(id) ON DELETE RESTRICT,
+  student_id            UUID NOT NULL REFERENCES profiles(id),
+  quote_id              UUID NOT NULL REFERENCES quotes(id),
+  amount                NUMERIC(10, 2) NOT NULL,
+  currency              TEXT NOT NULL DEFAULT 'NGN',
+  status                payment_status NOT NULL DEFAULT 'PENDING',
+  paystack_reference    TEXT UNIQUE,       -- Paystack transaction reference
+  paystack_access_code  TEXT,             -- used to open Paystack popup
+  verified_at           TIMESTAMPTZ,      -- set when webhook confirms success
+  failure_reason        TEXT,
+  metadata              JSONB,            -- raw Paystack response (for auditing)
+  created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);</code></pre>
+
+<blockquote><strong>Rule:</strong> The <code>status</code> column is only ever updated by the Paystack webhook handler Edge Function. The frontend may initialize a payment record as <code>PENDING</code> but may never mark it <code>SUCCESSFUL</code>. A payment is only confirmed when the backend receives and verifies the webhook from Paystack.</blockquote>
+
+<hr>
+
+<h3>5.7 <code>messages</code> table</h3>
+
+<pre class="code-block"><code>CREATE TYPE message_type AS ENUM (
+  'text',
+  'file',
+  'system'
+);
+
+CREATE TABLE messages (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  request_id  UUID NOT NULL REFERENCES requests(id) ON DELETE CASCADE,
+  sender_id   UUID REFERENCES profiles(id),   -- NULL for system messages
+  type        message_type NOT NULL DEFAULT 'text',
+  content     TEXT,
+  file_url    TEXT,
+  file_name   TEXT,
+  file_size   BIGINT,
+  file_type   TEXT,
+  is_read     BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);</code></pre>
+
+<p>System messages (status changes, payment received, etc.) are inserted with <code>sender_id = NULL</code> and <code>type = 'system'</code>.</p>
+
+<hr>
+
+<h3>5.8 <code>files</code> table</h3>
+
+<p>Tracks all uploaded files (request attachments and deliverables).</p>
+
+<pre class="code-block"><code>CREATE TYPE file_category AS ENUM (
+  'attachment',     -- uploaded by student with request
+  'deliverable',    -- uploaded by team for student
+  'resource'        -- public resource library file
+);
+
+CREATE TABLE files (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  request_id    UUID REFERENCES requests(id) ON DELETE CASCADE,
+  uploaded_by   UUID NOT NULL REFERENCES profiles(id),
+  category      file_category NOT NULL DEFAULT 'attachment',
+  storage_path  TEXT NOT NULL,    -- path inside Supabase Storage bucket
+  file_name     TEXT NOT NULL,
+  file_type     TEXT NOT NULL,    -- MIME type
+  file_size     BIGINT NOT NULL,  -- bytes
+  is_deleted    BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);</code></pre>
+
+<hr>
+
+<h3>5.9 <code>notifications</code> table</h3>
+
+<pre class="code-block"><code>CREATE TYPE notification_type AS ENUM (
+  'request_submitted',
+  'status_changed',
+  'quote_received',
+  'quote_accepted',
+  'payment_confirmed',
+  'new_message',
+  'new_file',
+  'request_completed',
+  'general'
+);
+
+CREATE TABLE notifications (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  type        notification_type NOT NULL,
+  title       TEXT NOT NULL,
+  body        TEXT,
+  link        TEXT,               -- frontend route to navigate to
+  is_read     BOOLEAN NOT NULL DEFAULT FALSE,
+  request_id  UUID REFERENCES requests(id),
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);</code></pre>
+
+<hr>
+
+<h3>5.10 <code>resources</code> table</h3>
+
+<pre class="code-block"><code>CREATE TYPE resource_category AS ENUM (
+  'study_guides',
+  'past_questions',
+  'programming',
+  'research',
+  'project_ideas',
+  'career'
+);
+
+CREATE TABLE resources (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title         TEXT NOT NULL,
+  description   TEXT,
+  category      resource_category NOT NULL,
+  author_id     UUID REFERENCES profiles(id),
+  storage_path  TEXT,              -- path in Supabase Storage (nullable for link-only resources)
+  external_url  TEXT,
+  download_count INTEGER DEFAULT 0,
+  is_published  BOOLEAN NOT NULL DEFAULT FALSE,
+  tags          TEXT[],
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);</code></pre>
+
+<hr>
+
+<h3>5.11 <code>team_assignments</code> table</h3>
+
+<p>Tracks which team member is working on which request and their workload.</p>
+
+<pre class="code-block"><code>CREATE TABLE team_assignments (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  request_id  UUID NOT NULL REFERENCES requests(id) ON DELETE CASCADE,
+  member_id   UUID NOT NULL REFERENCES profiles(id),
+  assigned_by UUID NOT NULL REFERENCES profiles(id),
+  assigned_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  is_active   BOOLEAN NOT NULL DEFAULT TRUE
+);</code></pre>
+
+<hr>
+
+<h3>5.12 <code>updated_at</code> Auto-Update Trigger</h3>
+
+<p>Apply to all tables that have <code>updated_at</code>:</p>
+
+<pre class="code-block"><code>CREATE OR REPLACE FUNCTION set_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Apply to each table:
+CREATE TRIGGER set_profiles_updated_at
+  BEFORE UPDATE ON profiles
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+CREATE TRIGGER set_requests_updated_at
+  BEFORE UPDATE ON requests
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+CREATE TRIGGER set_quotes_updated_at
+  BEFORE UPDATE ON quotes
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+CREATE TRIGGER set_payments_updated_at
+  BEFORE UPDATE ON payments
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+-- Repeat for resources, service_categories</code></pre>
+
+<hr>
+
+<h2>6. Row Level Security (RLS)</h2>
+
+<p>RLS is the primary security layer. Enable it on every table. By default, no row is accessible to anyone. Policies selectively grant access.</p>
+
+<h3>Enable RLS</h3>
+
+<pre class="code-block"><code>ALTER TABLE profiles              ENABLE ROW LEVEL SECURITY;
+ALTER TABLE requests              ENABLE ROW LEVEL SECURITY;
+ALTER TABLE request_status_history ENABLE ROW LEVEL SECURITY;
+ALTER TABLE quotes                ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payments              ENABLE ROW LEVEL SECURITY;
+ALTER TABLE messages              ENABLE ROW LEVEL SECURITY;
+ALTER TABLE files                 ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notifications         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE resources             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE team_assignments      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE service_categories    ENABLE ROW LEVEL SECURITY;</code></pre>
+
+<h3>Helper Function</h3>
+
+<pre class="code-block"><code>CREATE OR REPLACE FUNCTION get_my_role()
+RETURNS TEXT AS $$
+  SELECT role FROM profiles WHERE id = auth.uid();
+$$ LANGUAGE sql SECURITY DEFINER STABLE;</code></pre>
+
+<h3><code>profiles</code> Policies</h3>
+
+<pre class="code-block"><code>-- Users can read their own profile
+CREATE POLICY "profiles: read own"
+  ON profiles FOR SELECT
+  USING (id = auth.uid());
+
+-- Admins can read all profiles
+CREATE POLICY "profiles: admin read all"
+  ON profiles FOR SELECT
+  USING (get_my_role() IN ('admin', 'staff'));
+
+-- Users can update their own profile
+CREATE POLICY "profiles: update own"
+  ON profiles FOR UPDATE
+  USING (id = auth.uid());</code></pre>
+
+<h3><code>requests</code> Policies</h3>
+
+<pre class="code-block"><code>-- Students can see only their own requests
+CREATE POLICY "requests: student read own"
+  ON requests FOR SELECT
+  USING (student_id = auth.uid());
+
+-- Students can insert requests for themselves
+CREATE POLICY "requests: student insert"
+  ON requests FOR INSERT
+  WITH CHECK (student_id = auth.uid());
+
+-- Students can update their own DRAFT requests only
+CREATE POLICY "requests: student update draft"
+  ON requests FOR UPDATE
+  USING (student_id = auth.uid() AND status = 'DRAFT');
+
+-- Admins and staff can read all requests
+CREATE POLICY "requests: admin read all"
+  ON requests FOR SELECT
+  USING (get_my_role() IN ('admin', 'staff'));
+
+-- Admins can update any request
+CREATE POLICY "requests: admin update"
+  ON requests FOR UPDATE
+  USING (get_my_role() = 'admin');</code></pre>
+
+<h3><code>messages</code> Policies</h3>
+
+<pre class="code-block"><code>-- Students can read messages for their own requests
+CREATE POLICY "messages: student read"
+  ON messages FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM requests
+      WHERE requests.id = messages.request_id
+      AND requests.student_id = auth.uid()
+    )
+  );
+
+-- Students can insert messages into their own requests
+CREATE POLICY "messages: student insert"
+  ON messages FOR INSERT
+  WITH CHECK (
+    sender_id = auth.uid()
+    AND EXISTS (
+      SELECT 1 FROM requests
+      WHERE requests.id = messages.request_id
+      AND requests.student_id = auth.uid()
+    )
+  );
+
+-- Admins and staff can read and insert all messages
+CREATE POLICY "messages: admin all"
+  ON messages FOR ALL
+  USING (get_my_role() IN ('admin', 'staff'));</code></pre>
+
+<h3><code>notifications</code> Policies</h3>
+
+<pre class="code-block"><code>-- Users can only see their own notifications
+CREATE POLICY "notifications: read own"
+  ON notifications FOR SELECT
+  USING (user_id = auth.uid());
+
+-- Users can update own (mark as read)
+CREATE POLICY "notifications: update own"
+  ON notifications FOR UPDATE
+  USING (user_id = auth.uid());</code></pre>
+
+<h3><code>quotes</code> Policies</h3>
+
+<pre class="code-block"><code>-- Students can read quotes for their own requests
+CREATE POLICY "quotes: student read"
+  ON quotes FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM requests
+      WHERE requests.id = quotes.request_id
+      AND requests.student_id = auth.uid()
+    )
+  );
+
+-- Only admins can create quotes
+CREATE POLICY "quotes: admin insert"
+  ON quotes FOR INSERT
+  WITH CHECK (get_my_role() = 'admin');
+
+-- Admins can update quotes
+CREATE POLICY "quotes: admin update"
+  ON quotes FOR UPDATE
+  USING (get_my_role() = 'admin');</code></pre>
+
+<h3><code>payments</code> Policies</h3>
+
+<pre class="code-block"><code>-- Students can read their own payments
+CREATE POLICY "payments: student read own"
+  ON payments FOR SELECT
+  USING (student_id = auth.uid());
+
+-- Students can insert a pending payment (to initiate Paystack)
+CREATE POLICY "payments: student insert pending"
+  ON payments FOR INSERT
+  WITH CHECK (student_id = auth.uid() AND status = 'PENDING');
+
+-- Students cannot update payments — only the webhook Edge Function can (uses service role)
+-- Admins can read all payments
+CREATE POLICY "payments: admin read all"
+  ON payments FOR SELECT
+  USING (get_my_role() = 'admin');</code></pre>
+
+<h3><code>resources</code> Policies</h3>
+
+<pre class="code-block"><code>-- Published resources are readable by all authenticated users
+CREATE POLICY "resources: read published"
+  ON resources FOR SELECT
+  USING (is_published = TRUE);
+
+-- Admins can manage all resources
+CREATE POLICY "resources: admin all"
+  ON resources FOR ALL
+  USING (get_my_role() = 'admin');</code></pre>
+
+<h3><code>service_categories</code> Policies</h3>
+
+<pre class="code-block"><code>-- Everyone can read active categories
+CREATE POLICY "service_categories: read active"
+  ON service_categories FOR SELECT
+  USING (is_active = TRUE);
+
+-- Admins can manage categories
+CREATE POLICY "service_categories: admin all"
+  ON service_categories FOR ALL
+  USING (get_my_role() = 'admin');</code></pre>
+
+<hr>
+
+<h2>7. Authentication</h2>
+
+<h3>Provider</h3>
+
+<p>Use <strong>Supabase Auth</strong> with email/password as the primary method.</p>
+
+<h3>Registration Flow</h3>
+
+<ol>
+<li>Frontend calls <code>supabase.auth.signUp({ email, password, options: { data: { full_name } } })</code></li>
+<li>Supabase sends a confirmation email</li>
+<li>The <code>on_auth_user_created</code> trigger fires and inserts a row into <code>profiles</code></li>
+<li>Student is directed to <code>/verify-email</code> page</li>
+<li>After verifying, student is redirected to <code>/app</code></li>
+</ol>
+
+<h3>Login Flow</h3>
+
+<ol>
+<li>Frontend calls <code>supabase.auth.signInWithPassword({ email, password })</code></li>
+<li>On success, Supabase returns a session (access token + refresh token)</li>
+<li>The <code>@supabase/supabase-js</code> client automatically stores the session in localStorage</li>
+<li>Frontend reads the user's role from <code>profiles</code> to determine which app section to load (<code>/app</code> vs <code>/admin</code>)</li>
+</ol>
+
+<h3>Session Management</h3>
+
+<pre class="code-block"><code>// Listen for auth state changes
+supabase.auth.onAuthStateChange((event, session) =&gt; {
+  if (event === 'SIGNED_IN') {
+    // fetch profile, set auth store
+  }
+  if (event === 'SIGNED_OUT') {
+    // clear stores, redirect to /login
+  }
+  if (event === 'TOKEN_REFRESHED') {
+    // session auto-refreshed, no action needed
+  }
+})</code></pre>
+
+<h3>Password Reset Flow</h3>
+
+<ol>
+<li>Frontend calls <code>supabase.auth.resetPasswordForEmail(email, { redirectTo: 'https://yourdomain.com/reset-password' })</code></li>
+<li>User receives reset email with a link containing a recovery token</li>
+<li>Frontend at <code>/reset-password</code> extracts the token from the URL and calls <code>supabase.auth.updateUser({ password: newPassword })</code></li>
+</ol>
+
+<h3>Role Detection</h3>
+
+<p>After login, fetch the user's profile to determine their role:</p>
+
+<pre class="code-block"><code>const { data: profile } = await supabase
+  .from('profiles')
+  .select('role')
+  .eq('id', session.user.id)
+  .single()
+
+if (profile.role === 'admin' || profile.role === 'staff') {
+  navigate('/admin')
+} else {
+  navigate('/app')
+}</code></pre>
+
+<hr>
+
+<h2>8. Storage</h2>
+
+<h3>Buckets</h3>
+
+<p>Create the following buckets in Supabase Storage:</p>
+
+<table><thead><tr><th>Bucket Name</th><th>Access</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><code>request-attachments</code></td><td>Private</td><td>Files uploaded by students with requests</td></tr>
+<tr><td><code>deliverables</code></td><td>Private</td><td>Files uploaded by team for students</td></tr>
+<tr><td><code>resources</code></td><td>Public</td><td>Resource library downloads</td></tr>
+<tr><td><code>avatars</code></td><td>Public</td><td>Profile avatars</td></tr>
+</tbody></table>
+
+<h3>Bucket Policies</h3>
+
+<p><strong><code>request-attachments</code> — students can upload to their own request folders:</strong></p>
+
+<pre class="code-block"><code>-- Allow students to upload to their own folder: request-attachments/&lt;student_id&gt;/*
+CREATE POLICY "request-attachments: student upload"
+  ON storage.objects FOR INSERT
+  WITH CHECK (
+    bucket_id = 'request-attachments'
+    AND (storage.foldername(name))[1] = auth.uid()::TEXT
+  );
+
+-- Allow students to read their own files
+CREATE POLICY "request-attachments: student read own"
+  ON storage.objects FOR SELECT
+  USING (
+    bucket_id = 'request-attachments'
+    AND (storage.foldername(name))[1] = auth.uid()::TEXT
+  );
+
+-- Allow admins to read all attachments
+CREATE POLICY "request-attachments: admin read all"
+  ON storage.objects FOR SELECT
+  USING (
+    bucket_id = 'request-attachments'
+    AND get_my_role() IN ('admin', 'staff')
+  );</code></pre>
+
+<h3>File Path Convention</h3>
+
+<p>Structure file paths consistently:</p>
+
+<pre class="code-block"><code>request-attachments/&lt;student_id&gt;/&lt;request_id&gt;/&lt;filename&gt;
+deliverables/&lt;request_id&gt;/&lt;filename&gt;
+resources/&lt;category&gt;/&lt;filename&gt;
+avatars/&lt;user_id&gt;/&lt;filename&gt;</code></pre>
+
+<h3>Uploading Files (Frontend)</h3>
+
+<pre class="code-block"><code>// services/fileService.ts
+export const uploadRequestAttachment = async (
+  studentId: string,
+  requestId: string,
+  file: File
+) =&gt; {
+  const path = `${studentId}/${requestId}/${Date.now()}_${file.name}`
+
+  const { data, error } = await supabase.storage
+    .from('request-attachments')
+    .upload(path, file, { cacheControl: '3600', upsert: false })
+
+  if (error) throw error
+
+  // Insert record into files table
+  await supabase.from('files').insert({
+    request_id: requestId,
+    uploaded_by: studentId,
+    category: 'attachment',
+    storage_path: data.path,
+    file_name: file.name,
+    file_type: file.type,
+    file_size: file.size,
+  })
+
+  return data.path
+}</code></pre>
+
+<h3>Signed URLs (Private Files)</h3>
+
+<p>Never expose private storage paths directly. Generate signed URLs server-side or via Edge Function:</p>
+
+<pre class="code-block"><code>const { data } = await supabase.storage
+  .from('request-attachments')
+  .createSignedUrl(storagePath, 3600) // 1 hour expiry
+
+// Return data.signedUrl to the frontend</code></pre>
+
+<hr>
+
+<h2>9. Edge Functions</h2>
+
+<p>Edge Functions run on Deno (TypeScript). They are deployed to Supabase and can be called from the frontend or triggered by webhooks.</p>
+
+<h3>Directory Structure</h3>
+
+<pre class="code-block"><code>supabase/
+└── functions/
+    ├── accept-quote/
+    │   └── index.ts
+    ├── initiate-payment/
+    │   └── index.ts
+    ├── paystack-webhook/
+    │   └── index.ts
+    ├── create-notification/
+    │   └── index.ts
+    ├── send-email/
+    │   └── index.ts
+    └── assign-request/
+        └── index.ts</code></pre>
+
+<p>Deploy a function:</p>
+
+<pre class="code-block"><code>supabase functions deploy accept-quote
+supabase functions deploy paystack-webhook --no-verify-jwt  # webhooks skip JWT</code></pre>
+
+<h3>9.1 <code>accept-quote</code></h3>
+
+<p>Called when a student accepts a quote. Updates the quote status and the request status atomically.</p>
+
+<pre class="code-block"><code>// supabase/functions/accept-quote/index.ts
+import { serve } from 'https://deno.land/std/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+serve(async (req) =&gt; {
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  )
+
+  const { quoteId } = await req.json()
+
+  // 1. Get quote and verify it belongs to the authenticated user's request
+  const { data: quote } = await supabase
+    .from('quotes')
+    .select('*, requests(student_id)')
+    .eq('id', quoteId)
+    .single()
+
+  if (!quote || quote.status !== 'PENDING') {
+    return new Response(JSON.stringify({ error: 'Invalid quote' }), { status: 400 })
+  }
+
+  // 2. Update quote status
+  await supabase.from('quotes')
+    .update({ status: 'ACCEPTED', responded_at: new Date().toISOString() })
+    .eq('id', quoteId)
+
+  // 3. Update request status to AWAITING_PAYMENT
+  await supabase.from('requests')
+    .update({ status: 'AWAITING_PAYMENT' })
+    .eq('id', quote.request_id)
+
+  // 4. Create a pending payment record
+  await supabase.from('payments').insert({
+    request_id: quote.request_id,
+    student_id: quote.requests.student_id,
+    quote_id: quoteId,
+    amount: quote.price,
+    currency: quote.currency,
+    status: 'PENDING',
+  })
+
+  // 5. Send notification to student
+  await supabase.from('notifications').insert({
+    user_id: quote.requests.student_id,
+    type: 'quote_accepted',
+    title: 'Quote accepted',
+    body: 'Your quote has been accepted. Proceed to payment.',
+    request_id: quote.request_id,
+    link: `/app/requests/${quote.request_id}`,
+  })
+
+  return new Response(JSON.stringify({ success: true }), { status: 200 })
+})</code></pre>
+
+<h3>9.2 <code>initiate-payment</code></h3>
+
+<p>Calls Paystack to create a transaction and returns the payment URL or access code to the frontend.</p>
+
+<pre class="code-block"><code>// supabase/functions/initiate-payment/index.ts
+serve(async (req) =&gt; {
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  )
+
+  const { paymentId } = await req.json()
+
+  const { data: payment } = await supabase
+    .from('payments')
+    .select('*, profiles(email), quotes(price)')
+    .eq('id', paymentId)
+    .single()
+
+  // Call Paystack initialize endpoint
+  const paystackRes = await fetch('https://api.paystack.co/transaction/initialize', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${Deno.env.get('PAYSTACK_SECRET_KEY')}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      email: payment.profiles.email,
+      amount: Math.round(payment.amount * 100), // Paystack uses kobo
+      reference: payment.id,
+      metadata: {
+        payment_id: payment.id,
+        request_id: payment.request_id,
+      },
+      callback_url: `${Deno.env.get('FRONTEND_URL')}/app/payments/${payment.id}`,
+    }),
+  })
+
+  const paystackData = await paystackRes.json()
+
+  // Save Paystack reference and access code
+  await supabase.from('payments').update({
+    paystack_reference: paystackData.data.reference,
+    paystack_access_code: paystackData.data.access_code,
+    status: 'PROCESSING',
+  }).eq('id', paymentId)
+
+  return new Response(JSON.stringify({
+    authorization_url: paystackData.data.authorization_url,
+    access_code: paystackData.data.access_code,
+    reference: paystackData.data.reference,
+  }), { status: 200 })
+})</code></pre>
+
+<h3>9.3 <code>assign-request</code></h3>
+
+<p>Admin assigns a team member to a request.</p>
+
+<pre class="code-block"><code>serve(async (req) =&gt; {
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  )
+
+  const { requestId, memberId, assignedBy } = await req.json()
+
+  // Deactivate previous assignments
+  await supabase.from('team_assignments')
+    .update({ is_active: false })
+    .eq('request_id', requestId)
+
+  // Create new assignment
+  await supabase.from('team_assignments').insert({
+    request_id: requestId,
+    member_id: memberId,
+    assigned_by: assignedBy,
+  })
+
+  // Update request assigned_to and status to ASSIGNED
+  await supabase.from('requests').update({
+    assigned_to: memberId,
+    status: 'ASSIGNED',
+  }).eq('id', requestId)
+
+  // System message
+  const { data: member } = await supabase
+    .from('profiles').select('full_name').eq('id', memberId).single()
+
+  await supabase.from('messages').insert({
+    request_id: requestId,
+    sender_id: null,
+    type: 'system',
+    content: `Request assigned to ${member.full_name}.`,
+  })
+
+  return new Response(JSON.stringify({ success: true }), { status: 200 })
+})</code></pre>
+
+<hr>
+
+<h2>10. Realtime</h2>
+
+<p>Supabase Realtime allows the frontend to subscribe to database changes without polling.</p>
+
+<h3>Enabling Realtime</h3>
+
+<p>In the Supabase dashboard, enable Realtime for:</p>
+<ul>
+<li><code>messages</code></li>
+<li><code>notifications</code></li>
+<li><code>requests</code> (status changes only)</li>
+</ul>
+
+<h3>Frontend Subscription — Messages</h3>
+
+<pre class="code-block"><code>// hooks/useRequestMessages.ts
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
+
+export const useRequestMessages = (requestId: string) =&gt; {
+  const [messages, setMessages] = useState&lt;Message[]&gt;([])
+
+  useEffect(() =&gt; {
+    // Initial load
+    supabase
+      .from('messages')
+      .select('*, sender:profiles(full_name, avatar_url)')
+      .eq('request_id', requestId)
+      .order('created_at', { ascending: true })
+      .then(({ data }) =&gt; setMessages(data ?? []))
+
+    // Subscribe to new messages
+    const channel = supabase
+      .channel(`messages:${requestId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `request_id=eq.${requestId}`,
+        },
+        (payload) =&gt; {
+          setMessages((prev) =&gt; [...prev, payload.new as Message])
+        }
+      )
+      .subscribe()
+
+    return () =&gt; { supabase.removeChannel(channel) }
+  }, [requestId])
+
+  return messages
+}</code></pre>
+
+<h3>Frontend Subscription — Notifications</h3>
+
+<pre class="code-block"><code>// Subscribe to new notifications for the current user
+const channel = supabase
+  .channel('notifications')
+  .on(
+    'postgres_changes',
+    {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'notifications',
+      filter: `user_id=eq.${userId}`,
+    },
+    (payload) =&gt; {
+      // Add to notification store, increment badge count
+    }
+  )
+  .subscribe()</code></pre>
+
+<hr>
+
+<h2>11. API Design Reference</h2>
+
+<p>With Supabase, most data access goes directly through the <code>@supabase/supabase-js</code> client. This section documents the key data access patterns the frontend should use.</p>
+
+<h3>Requests</h3>
+
+<pre class="code-block"><code>// Get all requests for the current student
+const { data } = await supabase
+  .from('requests')
+  .select(`
+    *,
+    category:service_categories(name, slug, icon),
+    assigned_member:profiles!requests_assigned_to_fkey(full_name, avatar_url)
+  `)
+  .eq('student_id', userId)
+  .order('created_at', { ascending: false })
+
+// Get a single request with full details
+const { data } = await supabase
+  .from('requests')
+  .select(`
+    *,
+    category:service_categories(*),
+    assigned_member:profiles!requests_assigned_to_fkey(full_name, avatar_url),
+    quote:quotes(*),
+    payment:payments(*),
+    files(*),
+    status_history:request_status_history(*, changed_by_profile:profiles(full_name))
+  `)
+  .eq('id', requestId)
+  .single()
+
+// Create a request
+const { data } = await supabase
+  .from('requests')
+  .insert({
+    student_id: userId,
+    category_id: categoryId,
+    title,
+    description,
+    subject,
+    department,
+    technology,
+    deadline,
+    urgency,
+    status: 'SUBMITTED',
+  })
+  .select()
+  .single()
+
+// Admin: get all requests with filters
+const { data } = await supabase
+  .from('requests')
+  .select('*, student:profiles!requests_student_id_fkey(full_name, email), category:service_categories(name)')
+  .eq('status', filterStatus)        // optional
+  .eq('category_id', filterCategory) // optional
+  .gte('created_at', fromDate)       // optional
+  .lte('created_at', toDate)         // optional
+  .ilike('title', `%${search}%`)     // optional search
+  .order('created_at', { ascending: false })
+  .range(offset, offset + pageSize - 1)</code></pre>
+
+<h3>Messages</h3>
+
+<pre class="code-block"><code>// Send a message
+await supabase.from('messages').insert({
+  request_id: requestId,
+  sender_id: userId,
+  type: 'text',
+  content: messageText,
+})
+
+// Mark messages as read
+await supabase.from('messages')
+  .update({ is_read: true })
+  .eq('request_id', requestId)
+  .neq('sender_id', userId)</code></pre>
+
+<h3>Notifications</h3>
+
+<pre class="code-block"><code>// Get unread count
+const { count } = await supabase
+  .from('notifications')
+  .select('*', { count: 'exact', head: true })
+  .eq('user_id', userId)
+  .eq('is_read', false)
+
+// Mark all as read
+await supabase.from('notifications')
+  .update({ is_read: true })
+  .eq('user_id', userId)</code></pre>
+
+<h3>Admin — Dashboard Stats</h3>
+
+<pre class="code-block"><code>// Aggregate counts
+const [newReqs, activeReqs, completedReqs] = await Promise.all([
+  supabase.from('requests').select('*', { count: 'exact', head: true }).eq('status', 'SUBMITTED'),
+  supabase.from('requests').select('*', { count: 'exact', head: true }).eq('status', 'IN_PROGRESS'),
+  supabase.from('requests').select('*', { count: 'exact', head: true }).eq('status', 'COMPLETED'),
+])
+
+// Revenue (sum of successful payments)
+const { data } = await supabase
+  .from('payments')
+  .select('amount')
+  .eq('status', 'SUCCESSFUL')
+// Sum client-side or use a PostgreSQL view/function</code></pre>
+
+<hr>
+
+<h2>12. Payment Integration — Paystack</h2>
+
+<h3>Flow Overview</h3>
+
+<pre class="code-block"><code>Student clicks "Proceed to Payment"
+        ↓
+Frontend calls initiate-payment Edge Function
+        ↓
+Edge Function calls Paystack API → gets authorization_url
+        ↓
+Frontend redirects to Paystack checkout (or opens popup)
+        ↓
+Student completes payment on Paystack
+        ↓
+Paystack sends webhook to paystack-webhook Edge Function
+        ↓
+Edge Function verifies webhook signature
+        ↓
+Edge Function verifies transaction with Paystack verify API
+        ↓
+Edge Function updates payment status to SUCCESSFUL
+        ↓
+Edge Function updates request status to PAID
+        ↓
+Edge Function creates notification and system message
+        ↓
+Frontend (already subscribed via Realtime) updates UI</code></pre>
+
+<h3>12.1 Webhook Handler</h3>
+
+<pre class="code-block"><code>// supabase/functions/paystack-webhook/index.ts
+import { serve } from 'https://deno.land/std/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createHmac } from 'https://deno.land/std/crypto/mod.ts'
+
+serve(async (req) =&gt; {
+  const body = await req.text()
+  const signature = req.headers.get('x-paystack-signature') ?? ''
+
+  // Verify webhook signature
+  const hash = createHmac('sha512', Deno.env.get('PAYSTACK_SECRET_KEY')!)
+    .update(body)
+    .digest('hex')
+
+  if (hash !== signature) {
+    return new Response('Unauthorized', { status: 401 })
+  }
+
+  const event = JSON.parse(body)
+
+  if (event.event !== 'charge.success') {
+    return new Response('OK', { status: 200 }) // Acknowledge but ignore
+  }
+
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  )
+
+  const paystackRef = event.data.reference
+
+  // Find the payment by Paystack reference
+  const { data: payment } = await supabase
+    .from('payments')
+    .select('*')
+    .eq('paystack_reference', paystackRef)
+    .single()
+
+  if (!payment) {
+    return new Response('Payment not found', { status: 404 })
+  }
+
+  // Verify with Paystack directly (double-check)
+  const verifyRes = await fetch(`https://api.paystack.co/transaction/verify/${paystackRef}`, {
+    headers: { Authorization: `Bearer ${Deno.env.get('PAYSTACK_SECRET_KEY')}` },
+  })
+  const verifyData = await verifyRes.json()
+
+  if (verifyData.data.status !== 'success') {
+    return new Response('Verification failed', { status: 400 })
+  }
+
+  // Update payment as successful
+  await supabase.from('payments').update({
+    status: 'SUCCESSFUL',
+    verified_at: new Date().toISOString(),
+    metadata: event.data,
+  }).eq('id', payment.id)
+
+  // Update request status to PAID
+  await supabase.from('requests')
+    .update({ status: 'PAID' })
+    .eq('id', payment.request_id)
+
+  // System message
+  await supabase.from('messages').insert({
+    request_id: payment.request_id,
+    sender_id: null,
+    type: 'system',
+    content: `Payment of ${payment.currency} ${payment.amount} confirmed.`,
+  })
+
+  // Notification
+  await supabase.from('notifications').insert({
+    user_id: payment.student_id,
+    type: 'payment_confirmed',
+    title: 'Payment confirmed',
+    body: `Your payment of ${payment.currency} ${payment.amount} has been received.`,
+    request_id: payment.request_id,
+    link: `/app/payments/${payment.id}`,
+  })
+
+  return new Response('OK', { status: 200 })
+})</code></pre>
+
+<h3>Register Webhook URL in Paystack</h3>
+
+<p>In your Paystack dashboard, set the webhook URL to:</p>
+
+<pre class="code-block"><code>https://&lt;your-project-ref&gt;.supabase.co/functions/v1/paystack-webhook</code></pre>
+
+<hr>
+
+<h2>13. Notifications System</h2>
+
+<h3>Creation</h3>
+
+<p>Notifications are created in three ways:</p>
+
+<ol>
+<li><strong>Directly in Edge Functions</strong> (payment confirmed, quote created, request assigned) — using the service role</li>
+<li><strong>Database triggers</strong> (for status changes) — auto-insert when <code>requests.status</code> changes</li>
+<li><strong>Admin actions</strong> (via Edge Function when admin performs an action)</li>
+</ol>
+
+<h3>Status Change Notification Trigger</h3>
+
+<pre class="code-block"><code>CREATE OR REPLACE FUNCTION notify_on_status_change()
+RETURNS TRIGGER AS $$
+DECLARE
+  title_text TEXT;
+  body_text TEXT;
+BEGIN
+  IF OLD.status IS DISTINCT FROM NEW.status THEN
+    title_text := 'Request status updated';
+    body_text := 'Your request ' || NEW.reference || ' is now ' || NEW.status;
+
+    INSERT INTO notifications (user_id, type, title, body, request_id, link)
+    VALUES (
+      NEW.student_id,
+      'status_changed',
+      title_text,
+      body_text,
+      NEW.id,
+      '/app/requests/' || NEW.id
+    );
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER on_request_status_change_notify
+  AFTER UPDATE ON requests
+  FOR EACH ROW EXECUTE FUNCTION notify_on_status_change();</code></pre>
+
+<hr>
+
+<h2>14. Request Lifecycle</h2>
+
+<h3>State Machine Rules</h3>
+
+<p>These transitions are enforced in Edge Functions and RLS. The frontend should reflect them but never be the source of enforcement.</p>
+
+<pre class="code-block"><code>DRAFT         → SUBMITTED       (by student: submitting the form)
+SUBMITTED     → UNDER_REVIEW    (by admin: opening the request)
+UNDER_REVIEW  → QUOTED          (by admin: creating a quote)
+UNDER_REVIEW  → REJECTED        (by admin: rejecting the request)
+QUOTED        → AWAITING_PAYMENT (by student: accepting the quote — via Edge Function)
+QUOTED        → CANCELLED       (by student: declining the quote)
+AWAITING_PAYMENT → PAID         (by system: Paystack webhook confirmed)
+PAID          → ASSIGNED        (by admin: assigning to team member)
+ASSIGNED      → IN_PROGRESS     (by admin/staff: marking work started)
+IN_PROGRESS   → REVIEW          (by admin/staff: submitting for review)
+REVIEW        → COMPLETED       (by admin: marking complete)
+COMPLETED     → CLOSED          (by admin: archiving)
+ANY           → CANCELLED       (by student or admin, with conditions)
+ANY           → DISPUTED        (by student, for paid requests with issues)</code></pre>
+
+<h3>Validation Function</h3>
+
+<pre class="code-block"><code>CREATE OR REPLACE FUNCTION validate_status_transition(
+  old_status request_status,
+  new_status request_status,
+  user_role TEXT
+)
+RETURNS BOOLEAN AS $$
+BEGIN
+  -- Define allowed transitions
+  RETURN CASE
+    WHEN old_status = 'DRAFT'             AND new_status = 'SUBMITTED'         THEN TRUE
+    WHEN old_status = 'SUBMITTED'         AND new_status = 'UNDER_REVIEW'      AND user_role IN ('admin','staff') THEN TRUE
+    WHEN old_status = 'UNDER_REVIEW'      AND new_status = 'QUOTED'            AND user_role IN ('admin','staff') THEN TRUE
+    WHEN old_status = 'UNDER_REVIEW'      AND new_status = 'REJECTED'          AND user_role = 'admin' THEN TRUE
+    WHEN old_status = 'QUOTED'            AND new_status = 'AWAITING_PAYMENT'  THEN TRUE
+    WHEN old_status = 'QUOTED'            AND new_status = 'CANCELLED'         THEN TRUE
+    WHEN old_status = 'AWAITING_PAYMENT'  AND new_status = 'PAID'              THEN TRUE
+    WHEN old_status = 'PAID'             AND new_status = 'ASSIGNED'           AND user_role IN ('admin','staff') THEN TRUE
+    WHEN old_status = 'ASSIGNED'          AND new_status = 'IN_PROGRESS'       AND user_role IN ('admin','staff') THEN TRUE
+    WHEN old_status = 'IN_PROGRESS'       AND new_status = 'REVIEW'            AND user_role IN ('admin','staff') THEN TRUE
+    WHEN old_status = 'REVIEW'            AND new_status = 'COMPLETED'         AND user_role = 'admin' THEN TRUE
+    WHEN old_status = 'COMPLETED'         AND new_status = 'CLOSED'            AND user_role = 'admin' THEN TRUE
+    ELSE FALSE
+  END;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;</code></pre>
+
+<hr>
+
+<h2>15. Email System</h2>
+
+<p>Use <strong>Resend</strong> (or Supabase's built-in email) for transactional emails.</p>
+
+<h3>Supabase Auth Emails (Built-in)</h3>
+
+<p>Configure in Supabase dashboard → Authentication → Email Templates:</p>
+<ul>
+<li>Confirm signup</li>
+<li>Magic link</li>
+<li>Password reset</li>
+<li>Email change</li>
+</ul>
+
+<h3>Transactional Emails via Resend</h3>
+
+<p>For custom emails (quote received, request completed, etc.), call the <code>send-email</code> Edge Function.</p>
+
+<pre class="code-block"><code>// supabase/functions/send-email/index.ts
+serve(async (req) =&gt; {
+  const { to, subject, html } = await req.json()
+
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${Deno.env.get('RESEND_API_KEY')}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: 'UniAssist &lt;noreply@uniassist.app&gt;',
+      to,
+      subject,
+      html,
+    }),
+  })
+
+  const data = await res.json()
+  return new Response(JSON.stringify(data), { status: res.status })
+})</code></pre>
+
+<h3>Email Triggers</h3>
+
+<table><thead><tr><th>Event</th><th>Email Sent To</th></tr></thead><tbody>
+<tr><td>Registration</td><td>Student (verify email)</td></tr>
+<tr><td>Request submitted</td><td>Student (confirmation + reference)</td></tr>
+<tr><td>Quote received</td><td>Student</td></tr>
+<tr><td>Payment confirmed</td><td>Student + Admin</td></tr>
+<tr><td>Request assigned</td><td>Assigned team member</td></tr>
+<tr><td>Request completed</td><td>Student</td></tr>
+<tr><td>New message (if offline)</td><td>Student or Admin</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>16. Role &amp; Permission Model</h2>
+
+<h3>Roles</h3>
+
+<table><thead><tr><th>Role</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>student</code></td><td>Registered student. Can create and manage their own requests.</td></tr>
+<tr><td><code>staff</code></td><td>Team member. Can view and work on assigned requests, send messages.</td></tr>
+<tr><td><code>admin</code></td><td>Full access. Can manage all requests, create quotes, manage users, view analytics.</td></tr>
+</tbody></table>
+
+<h3>Permission Summary</h3>
+
+<table><thead><tr><th>Action</th><th>student</th><th>staff</th><th>admin</th></tr></thead><tbody>
+<tr><td>View own requests</td><td>✓</td><td>—</td><td>✓</td></tr>
+<tr><td>View all requests</td><td>—</td><td>✓</td><td>✓</td></tr>
+<tr><td>Create request</td><td>✓</td><td>—</td><td>—</td></tr>
+<tr><td>Create quote</td><td>—</td><td>—</td><td>✓</td></tr>
+<tr><td>Accept/decline quote</td><td>✓</td><td>—</td><td>—</td></tr>
+<tr><td>Initiate payment</td><td>✓</td><td>—</td><td>—</td></tr>
+<tr><td>Confirm payment</td><td>—</td><td>—</td><td>✓ (via webhook)</td></tr>
+<tr><td>Assign request</td><td>—</td><td>—</td><td>✓</td></tr>
+<tr><td>Update request status</td><td>—</td><td>✓ (limited)</td><td>✓</td></tr>
+<tr><td>Send messages</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>Upload attachments</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>Manage resources</td><td>—</td><td>—</td><td>✓</td></tr>
+<tr><td>View analytics</td><td>—</td><td>—</td><td>✓</td></tr>
+<tr><td>Manage team</td><td>—</td><td>—</td><td>✓</td></tr>
+<tr><td>Manage services</td><td>—</td><td>—</td><td>✓</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>17. File Management</h2>
+
+<h3>Allowed File Types</h3>
+
+<p>Validate on both frontend and storage:</p>
+
+<pre class="code-block"><code>const ALLOWED_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'application/zip',
+  'application/x-zip-compressed',
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+  'text/plain',
+  'text/javascript',
+  'text/typescript',
+]
+
+const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25MB per file
+const MAX_FILES_PER_REQUEST = 10</code></pre>
+
+<h3>Soft Delete</h3>
+
+<p>Files are never hard-deleted from storage immediately. Set <code>is_deleted = TRUE</code> in the <code>files</code> table. A scheduled cleanup job (Edge Function) can remove orphaned storage objects later.</p>
+
+<hr>
+
+<h2>18. Admin Operations</h2>
+
+<h3>Admin-Only Edge Functions</h3>
+
+<p>All sensitive admin operations go through Edge Functions using the service role key, not direct RLS-gated table access.</p>
+
+<table><thead><tr><th>Function</th><th>Trigger</th></tr></thead><tbody>
+<tr><td><code>create-quote</code></td><td>Admin submits quote form</td></tr>
+<tr><td><code>assign-request</code></td><td>Admin assigns team member</td></tr>
+<tr><td><code>update-request-status</code></td><td>Admin changes status</td></tr>
+<tr><td><code>upload-deliverable</code></td><td>Admin uploads completed work</td></tr>
+<tr><td><code>create-system-message</code></td><td>Any status change event</td></tr>
+<tr><td><code>manage-resource</code></td><td>Admin creates/edits resources</td></tr>
+</tbody></table>
+
+<h3>Admin Dashboard Queries</h3>
+
+<p>Use PostgreSQL views to simplify complex admin queries:</p>
+
+<pre class="code-block"><code>-- View: admin_request_overview
+CREATE OR REPLACE VIEW admin_request_overview AS
+SELECT
+  r.id,
+  r.reference,
+  r.title,
+  r.status,
+  r.urgency,
+  r.deadline,
+  r.created_at,
+  r.progress,
+  sc.name AS category,
+  p.full_name AS student_name,
+  p.email AS student_email,
+  pm.full_name AS assigned_to_name,
+  q.price AS quote_price,
+  pay.status AS payment_status
+FROM requests r
+LEFT JOIN service_categories sc ON sc.id = r.category_id
+LEFT JOIN profiles p ON p.id = r.student_id
+LEFT JOIN profiles pm ON pm.id = r.assigned_to
+LEFT JOIN quotes q ON q.request_id = r.id
+LEFT JOIN payments pay ON pay.request_id = r.id;</code></pre>
+
+<hr>
+
+<h2>19. Security Guidelines</h2>
+
+<ol>
+<li><strong>Never use the service role key in the frontend.</strong> It bypasses all RLS. Only use it in Edge Functions.</li>
+<li><strong>Always verify payment server-side.</strong> The webhook is the only source of truth for a successful payment.</li>
+<li><strong>Validate all inputs in Edge Functions.</strong> Do not trust frontend-sent data without validation.</li>
+<li><strong>Use parameterized queries only.</strong> Never build SQL with string concatenation.</li>
+<li><strong>Sign all storage URLs.</strong> Private buckets must only be accessed via signed URLs with short expiry.</li>
+<li><strong>Verify Paystack webhook signatures.</strong> Always check the <code>x-paystack-signature</code> header.</li>
+<li><strong>Do not expose internal notes to students.</strong> The <code>internal_notes</code> field on <code>requests</code> must never appear in student-facing queries.</li>
+<li><strong>Rate limiting.</strong> Enable rate limiting in Supabase for Edge Functions exposed to the public.</li>
+<li><strong>RLS on every table.</strong> There must be no table without RLS enabled and a deny-by-default posture.</li>
+<li><strong>Audit trail.</strong> The <code>request_status_history</code> table provides a full audit trail. Do not allow it to be deleted.</li>
+</ol>
+
+<hr>
+
+<h2>20. Error Handling Standards</h2>
+
+<h3>Edge Function Error Responses</h3>
+
+<p>All Edge Functions return consistent JSON error responses:</p>
+
+<pre class="code-block"><code>// Standard error response shape
+type ErrorResponse = {
+  error: string
+  code?: string
+  details?: unknown
+}
+
+// Helper
+const errorResponse = (message: string, status: number, code?: string) =&gt;
+  new Response(JSON.stringify({ error: message, code }), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  })
+
+// Usage
+if (!payment) return errorResponse('Payment not found', 404, 'PAYMENT_NOT_FOUND')
+if (payment.status === 'SUCCESSFUL') return errorResponse('Already processed', 409, 'ALREADY_PROCESSED')</code></pre>
+
+<h3>Frontend Error Handling</h3>
+
+<pre class="code-block"><code>// services/requestService.ts
+export const createRequest = async (data: CreateRequestInput) =&gt; {
+  const { data: result, error } = await supabase
+    .from('requests')
+    .insert(data)
+    .select()
+    .single()
+
+  if (error) {
+    // Log error, throw typed error for UI to handle
+    console.error('[createRequest]', error)
+    throw new Error(error.message)
+  }
+
+  return result
+}</code></pre>
+
+<hr>
+
+<h2>21. Database Indexes &amp; Performance</h2>
+
+<pre class="code-block"><code>-- Requests: common query patterns
+CREATE INDEX idx_requests_student_id   ON requests(student_id);
+CREATE INDEX idx_requests_status       ON requests(status);
+CREATE INDEX idx_requests_assigned_to  ON requests(assigned_to);
+CREATE INDEX idx_requests_created_at   ON requests(created_at DESC);
+CREATE INDEX idx_requests_deadline     ON requests(deadline);
+
+-- Messages: per-request chat load
+CREATE INDEX idx_messages_request_id  ON messages(request_id, created_at);
+
+-- Notifications: per-user lookup
+CREATE INDEX idx_notifications_user_id ON notifications(user_id, is_read, created_at DESC);
+
+-- Payments: per-student and per-request
+CREATE INDEX idx_payments_student_id  ON payments(student_id);
+CREATE INDEX idx_payments_request_id  ON payments(request_id);
+CREATE INDEX idx_payments_paystack_ref ON payments(paystack_reference);
+
+-- Files: per-request
+CREATE INDEX idx_files_request_id     ON files(request_id);
+
+-- Status history: per-request timeline
+CREATE INDEX idx_status_history_request ON request_status_history(request_id, created_at);</code></pre>
+
+<hr>
+
+<h2>22. Deployment</h2>
+
+<h3>Supabase</h3>
+
+<ol>
+<li>Run all migrations against the production project: <code>supabase db push</code></li>
+<li>Deploy all Edge Functions: <code>supabase functions deploy --all</code></li>
+<li>Set all secrets via <code>supabase secrets set</code></li>
+<li>Enable Realtime for <code>messages</code>, <code>notifications</code>, <code>requests</code> in the dashboard</li>
+<li>Create storage buckets and configure policies</li>
+</ol>
+
+<h3>Frontend (Vercel)</h3>
+
+<ol>
+<li>Connect the GitHub repository to Vercel</li>
+<li>Set environment variables in Vercel dashboard (<code>VITE_SUPABASE_URL</code>, <code>VITE_SUPABASE_ANON_KEY</code>, <code>VITE_PAYSTACK_PUBLIC_KEY</code>)</li>
+<li>Vercel auto-deploys on every push to <code>main</code></li>
+<li>Set up preview deployments for pull requests</li>
+</ol>
+
+<h3>Paystack</h3>
+
+<ol>
+<li>Register your webhook URL in the Paystack dashboard</li>
+<li>Use test keys during development (<code>pk_test_</code>, <code>sk_test_</code>)</li>
+<li>Switch to live keys (<code>pk_live_</code>, <code>sk_live_</code>) only for production deployment</li>
+</ol>
+
+<hr>
+
+<h2>23. Backend Integration Checklist</h2>
+
+<p>Use this checklist when connecting the selected frontend to the backend.</p>
+
+<h3>Database</h3>
+<ul>
+<li>[ ] All migration files applied to production</li>
+<li>[ ] All seed data inserted (service categories, etc.)</li>
+<li>[ ] All triggers created and tested</li>
+<li>[ ] All RLS policies applied and tested for each role</li>
+<li>[ ] All indexes created</li>
+<li>[ ] <code>updated_at</code> triggers applied to all relevant tables</li>
+<li>[ ] Generated TypeScript types pulled into frontend (<code>supabase gen types</code>)</li>
+</ul>
+
+<h3>Auth</h3>
+<ul>
+<li>[ ] Email confirmation enabled</li>
+<li>[ ] Password reset email configured</li>
+<li>[ ] Email templates customized with UniAssist branding</li>
+<li>[ ] <code>on_auth_user_created</code> trigger tested</li>
+</ul>
+
+<h3>Storage</h3>
+<ul>
+<li>[ ] All buckets created with correct access settings</li>
+<li>[ ] Storage RLS policies applied</li>
+<li>[ ] Max file size limits configured</li>
+<li>[ ] File type validation working on frontend upload</li>
+</ul>
+
+<h3>Edge Functions</h3>
+<ul>
+<li>[ ] <code>accept-quote</code> deployed and tested</li>
+<li>[ ] <code>initiate-payment</code> deployed and tested</li>
+<li>[ ] <code>paystack-webhook</code> deployed, webhook URL registered in Paystack</li>
+<li>[ ] <code>assign-request</code> deployed and tested</li>
+<li>[ ] <code>send-email</code> deployed and tested</li>
+<li>[ ] All secrets set (<code>PAYSTACK_SECRET_KEY</code>, <code>RESEND_API_KEY</code>, <code>SUPABASE_SERVICE_ROLE_KEY</code>)</li>
+</ul>
+
+<h3>Realtime</h3>
+<ul>
+<li>[ ] <code>messages</code> table enabled for Realtime</li>
+<li>[ ] <code>notifications</code> table enabled for Realtime</li>
+<li>[ ] <code>requests</code> table enabled for Realtime</li>
+<li>[ ] Frontend Realtime subscriptions tested end-to-end</li>
+</ul>
+
+<h3>Payments</h3>
+<ul>
+<li>[ ] Paystack test mode tested with test cards</li>
+<li>[ ] Webhook receiving and processing correctly</li>
+<li>[ ] Payment status only confirmed via webhook (not frontend)</li>
+<li>[ ] Live keys swapped in for production</li>
+</ul>
+
+<h3>Frontend Service Layer</h3>
+<ul>
+<li>[ ] All mock data replaced with real Supabase calls</li>
+<li>[ ] All service functions using <code>src/services/</code> pattern</li>
+<li>[ ] Error handling in place for all async operations</li>
+<li>[ ] Loading states tested</li>
+</ul>
+
+<hr>
+
+<p><em>Document maintained by Balerioncodes. Update version number when making significant schema or architecture changes. Regenerate Supabase TypeScript types after every schema change.</em></p>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="doc-footer">
+    <span class="footer-left">UNIASSIST &nbsp;·&nbsp; <span class="footer-teal">BALERIONCODES</span> &nbsp;·&nbsp; BACKEND SPECIFICATION</span>
+    <span class="footer-right">DOC v1.0 &nbsp;·&nbsp; 2026</span>
+  </div>
+
+</div>
+</body>
+</html>

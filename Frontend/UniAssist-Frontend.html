@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>UniAssist — Frontend Specification</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:        #060e0b;
+  --surface:   #0d1f18;
+  --teal:      #00d4a1;
+  --teal-dim:  #00a87f;
+  --teal-glow: rgba(0,212,161,0.13);
+  --cream:     #e8e4d9;
+  --muted:     #6b8f84;
+  --border:    rgba(0,212,161,0.2);
+  --text:      #1a2e28;
+  --text-sub:  #3a5a52;
+  --text-dim:  #5a7a72;
+  --line:      #ddeae4;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 10.5pt; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #eaf2ee;
+  color: var(--text);
+  line-height: 1.75;
+}
+
+/* ── print hint ── */
+.print-hint {
+  position: fixed; top: 0; left: 0; right: 0;
+  background: var(--bg);
+  color: var(--teal);
+  font-size: 10.5px;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 7px 24px;
+  display: flex; align-items: center; gap: 18px;
+  z-index: 9999;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: 0.02em;
+}
+.print-hint strong { color: var(--cream); }
+.print-hint kbd {
+  background: rgba(0,212,161,0.12);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 7px;
+  font-size: 10px;
+  color: var(--teal);
+}
+body { padding-top: 34px; }
+
+@media print {
+  body { background: white; padding-top: 0; }
+  .print-hint { display: none !important; }
+  a { color: inherit !important; text-decoration: none !important; }
+  pre.code-block { page-break-inside: avoid; }
+  table { page-break-inside: avoid; }
+  h1, h2 { page-break-after: avoid; }
+}
+
+@page { size: A4; margin: 0; }
+
+/* ── document ── */
+.document {
+  max-width: 210mm;
+  margin: 0 auto;
+  background: white;
+  box-shadow: 0 4px 80px rgba(0,0,0,0.15);
+}
+
+/* ── cover ── */
+.cover {
+  background: var(--bg);
+  padding: 48px 52px 42px;
+  position: relative;
+  overflow: hidden;
+  min-height: 252px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.cover::before {
+  content: '';
+  position: absolute; top: -100px; right: -100px;
+  width: 380px; height: 380px;
+  background: radial-gradient(circle, rgba(0,212,161,0.18) 0%, transparent 65%);
+  pointer-events: none;
+}
+.cover::after {
+  content: '';
+  position: absolute; bottom: -80px; left: -20px;
+  width: 240px; height: 240px;
+  background: radial-gradient(circle, rgba(0,168,127,0.10) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.cover-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative; z-index: 1;
+}
+
+.logo-img {
+  height: 44px; width: auto; object-fit: contain;
+}
+.logo-fallback {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, var(--teal-dim), var(--teal));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; font-weight: 800;
+  color: var(--bg);
+}
+
+.cover-badge {
+  font-size: 8px; font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--teal);
+  background: rgba(0,212,161,0.09);
+  border: 1px solid var(--border);
+  padding: 4px 12px; border-radius: 4px;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.cover-body {
+  position: relative; z-index: 1;
+  margin-top: 38px;
+}
+
+.cover-eyebrow {
+  font-size: 8.5px; letter-spacing: 0.24em;
+  text-transform: uppercase; color: var(--teal);
+  font-weight: 600; font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 10px;
+}
+
+.cover-title {
+  font-size: 30px; font-weight: 800;
+  color: var(--cream); line-height: 1.12;
+  letter-spacing: -0.025em; margin-bottom: 8px;
+}
+.cover-title .accent { color: var(--teal); }
+
+.cover-subtitle {
+  font-size: 12.5px; color: var(--muted);
+  font-weight: 400; line-height: 1.6;
+}
+
+.cover-footer {
+  position: relative; z-index: 1;
+  margin-top: 38px;
+  border-top: 1px solid var(--border);
+  padding-top: 18px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.cover-meta { display: flex; gap: 36px; }
+.meta-label {
+  font-size: 7.5px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 3px;
+}
+.meta-value {
+  font-size: 10.5px; font-weight: 600; color: var(--cream);
+}
+
+.teal-accent-bar {
+  width: 3px; height: 42px;
+  background: linear-gradient(to bottom, var(--teal), transparent);
+  border-radius: 2px;
+}
+
+/* ── content ── */
+.content {
+  padding: 50px 52px 64px;
+}
+
+/* ── headings ── */
+h1 {
+  font-size: 20px; font-weight: 800;
+  color: var(--text); letter-spacing: -0.02em;
+  margin: 44px 0 14px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--teal);
+  line-height: 1.2;
+}
+h1:first-child { margin-top: 0; }
+
+h2 {
+  font-size: 14px; font-weight: 700;
+  color: var(--text); letter-spacing: -0.01em;
+  margin: 32px 0 10px;
+  display: flex; align-items: center; gap: 10px;
+}
+h2::before {
+  content: '';
+  display: inline-block;
+  width: 4px; height: 15px;
+  background: var(--teal);
+  border-radius: 2px; flex-shrink: 0;
+}
+
+h3 {
+  font-size: 11px; font-weight: 700;
+  color: var(--teal-dim);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 24px 0 8px;
+}
+
+h4 {
+  font-size: 11px; font-weight: 700;
+  color: var(--text);
+  margin: 18px 0 6px;
+}
+
+/* ── body ── */
+p {
+  font-size: 10.5pt; color: var(--text-sub);
+  margin: 0 0 12px; line-height: 1.78;
+}
+strong { color: var(--text); font-weight: 700; }
+em { color: var(--text-dim); }
+a { color: var(--teal-dim); }
+
+/* ── lists ── */
+ul, ol {
+  margin: 6px 0 14px 20px;
+}
+li {
+  font-size: 10.5pt; color: var(--text-sub);
+  line-height: 1.75; margin-bottom: 4px; padding-left: 3px;
+}
+ul li::marker { color: var(--teal); }
+ol li::marker { color: var(--teal); font-weight: 700; }
+
+/* ── hr ── */
+hr {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 30px 0;
+}
+
+/* ── blockquote ── */
+blockquote {
+  border-left: 3px solid var(--teal);
+  background: #f4faf7;
+  margin: 14px 0;
+  padding: 11px 16px;
+  border-radius: 0 6px 6px 0;
+  font-size: 10pt;
+  color: var(--text-dim);
+}
+
+/* ── inline code ── */
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5pt;
+  background: #edf5f0;
+  color: #0a5c40;
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid #cce8d8;
+}
+
+/* ── code block ── */
+pre.code-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 20px;
+  margin: 14px 0 22px;
+  overflow-x: auto;
+}
+pre.code-block::before {
+  content: '';
+  display: block;
+  width: 36px; height: 2px;
+  background: var(--teal);
+  border-radius: 1px;
+  margin-bottom: 12px;
+  opacity: 0.55;
+}
+pre.code-block code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7.8pt;
+  background: none; border: none; padding: 0;
+  color: #9fd4be;
+  white-space: pre;
+  line-height: 1.65;
+}
+
+/* ── tables ── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0 22px;
+  font-size: 9.5pt;
+}
+thead { background: var(--bg); }
+thead th {
+  color: var(--teal);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7.5pt; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 10px 14px; text-align: left;
+  border-bottom: 2px solid var(--teal-dim);
+}
+tbody tr { border-bottom: 1px solid var(--line); }
+tbody tr:nth-child(even) { background: #f8fcfa; }
+tbody td {
+  padding: 9px 14px;
+  color: var(--text-sub);
+  vertical-align: top;
+}
+tbody td code { font-size: 8pt; }
+
+/* ── footer strip ── */
+.doc-footer {
+  background: var(--bg);
+  padding: 14px 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--border);
+}
+.footer-left {
+  font-size: 8px; color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.1em;
+}
+.footer-right {
+  font-size: 8px; color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.08em;
+}
+.footer-teal { color: var(--teal); }
+</style>
+</head>
+<body>
+
+<div class="print-hint">
+  <strong>PDF Export Ready</strong>
+  <span>Press</span>
+  <kbd>Ctrl + P</kbd>
+  <span>→ Save as PDF &nbsp;·&nbsp; Paper: A4 &nbsp;·&nbsp; Margins: None &nbsp;·&nbsp; ✔ Background graphics</span>
+</div>
+
+<div class="document">
+
+  <!-- Cover -->
+  <div class="cover">
+    <div class="cover-top">
+      <div class="logo-fallback">B</div>
+      <span class="cover-badge">Frontend Docs</span>
+    </div>
+    <div class="cover-body">
+      <div class="cover-eyebrow">UniAssist · Balerioncodes</div>
+      <div class="cover-title">Frontend Specification</div>
+      <div class="cover-subtitle">Technology stack, routing, design system, component conventions, and integration readiness.</div>
+    </div>
+    <div class="cover-footer">
+      <div class="cover-meta">
+        <div>
+          <div class="meta-label">Team</div>
+          <div class="meta-value">Balerioncodes</div>
+        </div>
+        <div>
+          <div class="meta-label">Version</div>
+          <div class="meta-value">1.0</div>
+        </div>
+        <div>
+          <div class="meta-label">Year</div>
+          <div class="meta-value">2026</div>
+        </div>
+      </div>
+      <div class="teal-accent-bar"></div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="content">
+    <h1>UniAssist — Frontend Documentation</h1>
+
+<p><strong>Project:</strong> UniAssist  </p>
+<p><strong>Team:</strong> Balerioncodes  </p>
+<p><strong>Document Version:</strong> 1.0  </p>
+<p><strong>Year:</strong> 2026  </p>
+<p><strong>Stage:</strong> Frontend Design &amp; Development  </p>
+
+<hr>
+
+<h2>Table of Contents</h2>
+
+<ol>
+<li><a href="#1-overview">Overview</a></li>
+<li><a href="#2-technology-stack">Technology Stack</a></li>
+<li><a href="#3-project-structure">Project Structure</a></li>
+<li><a href="#4-routing--information-architecture">Routing &amp; Information Architecture</a></li>
+<li><a href="#5-branding--visual-identity">Branding &amp; Visual Identity</a></li>
+<li><a href="#6-design-system">Design System</a></li>
+<li><a href="#7-pages--features">Pages &amp; Features</a></li>
+<li><a href="#8-state-management">State Management</a></li>
+<li><a href="#9-forms--validation">Forms &amp; Validation</a></li>
+<li><a href="#10-mock-data-strategy">Mock Data Strategy</a></li>
+<li><a href="#11-backend-integration-readiness">Backend Integration Readiness</a></li>
+<li><a href="#12-component-conventions">Component Conventions</a></li>
+<li><a href="#13-responsive-design">Responsive Design</a></li>
+<li><a href="#14-performance-guidelines">Performance Guidelines</a></li>
+<li><a href="#15-developer-notes">Developer Notes</a></li>
+</ol>
+
+<hr>
+
+<h2>1. Overview</h2>
+
+<p>UniAssist is a student support platform where students can request academic, technical, and project-related assistance. The frontend is the complete visual and interactive layer for three user types:</p>
+
+<ul>
+<li><strong>Visitors</strong> — browsing the public website</li>
+<li><strong>Students</strong> — authenticated users managing their requests</li>
+<li><strong>Administrators</strong> — internal team managing the platform</li>
+</ul>
+
+<p>The frontend is being built independently by three developers as a design competition. The strongest implementation will be selected and become the foundation of the final production application. All three implementations must follow this specification so they remain compatible with the same backend.</p>
+
+<blockquote><strong>Important:</strong> Use realistic mock data during this phase. Do not hard-code data in a way that makes backend integration difficult later. Structure everything around the real data model described in this document.</blockquote>
+
+<hr>
+
+<h2>2. Technology Stack</h2>
+
+<table><thead><tr><th>Concern</th><th>Tool</th></tr></thead><tbody>
+<tr><td>Framework</td><td>React 18+</td></tr>
+<tr><td>Language</td><td>TypeScript</td></tr>
+<tr><td>Build Tool</td><td>Vite</td></tr>
+<tr><td>Styling</td><td>Tailwind CSS</td></tr>
+<tr><td>UI Components</td><td>shadcn/ui</td></tr>
+<tr><td>Icons</td><td>Lucide React</td></tr>
+<tr><td>Animation</td><td>Framer Motion</td></tr>
+<tr><td>Routing</td><td>React Router v6+</td></tr>
+<tr><td>Forms</td><td>React Hook Form</td></tr>
+<tr><td>Validation</td><td>Zod</td></tr>
+<tr><td>Simple State</td><td>React useState / useContext</td></tr>
+<tr><td>Complex State</td><td>Zustand</td></tr>
+<tr><td>Future Auth</td><td>Supabase Auth</td></tr>
+<tr><td>Future Database</td><td>Supabase PostgreSQL</td></tr>
+<tr><td>Future Storage</td><td>Supabase Storage</td></tr>
+<tr><td>Future Realtime</td><td>Supabase Realtime</td></tr>
+<tr><td>Future Payments</td><td>Paystack</td></tr>
+<tr><td>Deployment</td><td>Vercel</td></tr>
+<tr><td>Version Control</td><td>Git + GitHub</td></tr>
+</tbody></table>
+
+<h3>Installation</h3>
+
+<pre class="code-block"><code>npm create vite@latest uniassist -- --template react-ts
+cd uniassist
+npm install
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+npm install react-router-dom
+npm install react-hook-form zod @hookform/resolvers
+npm install zustand
+npm install framer-motion
+npm install lucide-react
+npx shadcn@latest init</code></pre>
+
+<hr>
+
+<h2>3. Project Structure</h2>
+
+<pre class="code-block"><code>src/
+├── assets/                  # Static images, logos, fonts
+├── components/
+│   ├── ui/                  # shadcn/ui base components
+│   ├── layout/              # Navbar, Sidebar, Footer, PageWrapper
+│   ├── common/              # Buttons, Badges, Cards, Avatars, Loaders
+│   ├── forms/               # Reusable form field components
+│   ├── request/             # Request-specific components
+│   ├── messaging/           # Chat/message components
+│   ├── notifications/       # Notification dropdown and page
+│   └── admin/               # Admin-specific components
+├── pages/
+│   ├── public/              # Landing, Services, About, Contact, etc.
+│   ├── auth/                # Login, Register, ForgotPassword, etc.
+│   ├── app/                 # Student dashboard pages
+│   └── admin/               # Admin dashboard pages
+├── hooks/                   # Custom React hooks
+├── store/                   # Zustand stores
+├── services/                # API service layer (future Supabase calls)
+├── types/                   # TypeScript type definitions
+├── lib/                     # Utilities, validators, constants
+├── mock/                    # Mock data for development
+├── router/                  # Route definitions and guards
+└── main.tsx</code></pre>
+
+<hr>
+
+<h2>4. Routing &amp; Information Architecture</h2>
+
+<h3>Public Routes (<code>/</code>)</h3>
+
+<table><thead><tr><th>Path</th><th>Page</th></tr></thead><tbody>
+<tr><td><code>/</code></td><td>Home / Landing Page</td></tr>
+<tr><td><code>/services</code></td><td>Services Overview</td></tr>
+<tr><td><code>/how-it-works</code></td><td>How It Works</td></tr>
+<tr><td><code>/resources</code></td><td>Public Resource Library</td></tr>
+<tr><td><code>/about</code></td><td>About UniAssist</td></tr>
+<tr><td><code>/contact</code></td><td>Contact Page</td></tr>
+<tr><td><code>/login</code></td><td>Login</td></tr>
+<tr><td><code>/register</code></td><td>Register</td></tr>
+<tr><td><code>/forgot-password</code></td><td>Forgot Password</td></tr>
+<tr><td><code>/reset-password</code></td><td>Reset Password</td></tr>
+<tr><td><code>/verify-email</code></td><td>Email Verification</td></tr>
+</tbody></table>
+
+<h3>Student App Routes (<code>/app</code>)</h3>
+
+<blockquote>All <code>/app</code> routes require authentication. Redirect unauthenticated users to <code>/login</code>.</blockquote>
+
+<table><thead><tr><th>Path</th><th>Page</th></tr></thead><tbody>
+<tr><td><code>/app</code></td><td>Student Dashboard</td></tr>
+<tr><td><code>/app/requests</code></td><td>My Requests (list)</td></tr>
+<tr><td><code>/app/requests/new</code></td><td>Create Request (multi-step)</td></tr>
+<tr><td><code>/app/requests/:id</code></td><td>Request Details</td></tr>
+<tr><td><code>/app/messages</code></td><td>Messages (all conversations)</td></tr>
+<tr><td><code>/app/messages/:requestId</code></td><td>Request Conversation</td></tr>
+<tr><td><code>/app/payments</code></td><td>Payments History</td></tr>
+<tr><td><code>/app/payments/:id</code></td><td>Payment Detail</td></tr>
+<tr><td><code>/app/resources</code></td><td>Resource Library</td></tr>
+<tr><td><code>/app/notifications</code></td><td>Notifications Page</td></tr>
+<tr><td><code>/app/profile</code></td><td>Profile</td></tr>
+<tr><td><code>/app/settings</code></td><td>Settings</td></tr>
+<tr><td><code>/app/help</code></td><td>Help &amp; Support</td></tr>
+</tbody></table>
+
+<h3>Admin Routes (<code>/admin</code>)</h3>
+
+<blockquote>All <code>/admin</code> routes require admin role. Redirect unauthorized users.</blockquote>
+
+<table><thead><tr><th>Path</th><th>Page</th></tr></thead><tbody>
+<tr><td><code>/admin</code></td><td>Admin Dashboard</td></tr>
+<tr><td><code>/admin/requests</code></td><td>All Requests</td></tr>
+<tr><td><code>/admin/requests/:id</code></td><td>Request Details</td></tr>
+<tr><td><code>/admin/students</code></td><td>Students List</td></tr>
+<tr><td><code>/admin/students/:id</code></td><td>Student Profile</td></tr>
+<tr><td><code>/admin/messages</code></td><td>Messages</td></tr>
+<tr><td><code>/admin/payments</code></td><td>Payments</td></tr>
+<tr><td><code>/admin/team</code></td><td>Team Management</td></tr>
+<tr><td><code>/admin/services</code></td><td>Services Management</td></tr>
+<tr><td><code>/admin/resources</code></td><td>Resource Management</td></tr>
+<tr><td><code>/admin/analytics</code></td><td>Analytics</td></tr>
+<tr><td><code>/admin/notifications</code></td><td>Notifications</td></tr>
+<tr><td><code>/admin/settings</code></td><td>Settings</td></tr>
+</tbody></table>
+
+<h3>Route Guards</h3>
+
+<p>Create an <code>AuthGuard</code> component that wraps protected routes:</p>
+
+<pre class="code-block"><code>// router/AuthGuard.tsx
+// Check auth state from Zustand/Context
+// If not authenticated → redirect to /login
+// If not admin on /admin route → redirect to /app</code></pre>
+
+<hr>
+
+<h2>5. Branding &amp; Visual Identity</h2>
+
+<p>UniAssist is built under <strong>Balerioncodes</strong>. The visual identity should reflect a premium, modern SaaS/EdTech product — not a generic university portal.</p>
+
+<h3>Balerioncodes Brand Colors</h3>
+
+<p>Use these as your foundation. Minor adjustments are allowed for contrast and accessibility.</p>
+
+<pre class="code-block"><code>/* Suggested palette — adapt as needed */
+--color-primary:     #6C3CE1;   /* Deep violet — primary brand */
+--color-primary-dark:#5128C9;
+--color-accent:      #A78BFA;   /* Light violet — accents */
+--color-bg:          #0F0E17;   /* Dark background */
+--color-surface:     #1A1826;   /* Card/panel surfaces */
+--color-border:      #2E2A3B;   /* Borders */
+--color-text:        #F0EFF4;   /* Primary text */
+--color-muted:       #8B8998;   /* Secondary/muted text */
+--color-success:     #34D399;
+--color-warning:     #FBBF24;
+--color-error:       #F87171;</code></pre>
+
+<blockquote>You may use a light theme variant. Keep brand recognizable. Avoid randomizing the color palette entirely.</blockquote>
+
+<h3>Typography</h3>
+
+<ul>
+<li><strong>Headings:</strong> A premium sans-serif (e.g., Inter, Geist, or DM Sans)</li>
+<li><strong>Body:</strong> Same family, regular weight</li>
+<li><strong>Mono:</strong> JetBrains Mono or Fira Code (for code, request IDs, references)</li>
+</ul>
+
+<h3>What to Aim For</h3>
+
+<ul>
+<li>Strong whitespace and breathing room</li>
+<li>Consistent spacing scale (use Tailwind's default scale)</li>
+<li>Subtle shadows (<code>shadow-sm</code>, not heavy drop shadows)</li>
+<li>Refined borders (<code>border border-border</code>)</li>
+<li>Status badges with clear color coding</li>
+</ul>
+
+<h3>What to Avoid</h3>
+
+<ul>
+<li>Excessive glassmorphism</li>
+<li>Too many gradient layers</li>
+<li>Overly rounded "bubbly" cards</li>
+<li>Cluttered dashboards with too much information density</li>
+<li>Generic bootstrap/template aesthetics</li>
+</ul>
+
+<hr>
+
+<h2>6. Design System</h2>
+
+<p>Build using <strong>shadcn/ui</strong> as your component foundation. Customize the components to match the UniAssist visual identity.</p>
+
+<h3>Core Components to Implement</h3>
+
+<table><thead><tr><th>Component</th><th>Notes</th></tr></thead><tbody>
+<tr><td><code>Button</code></td><td>Primary, secondary, ghost, destructive, loading state</td></tr>
+<tr><td><code>Card</code></td><td>Consistent card wrapper used across dashboards</td></tr>
+<tr><td><code>Badge</code></td><td>Status badges (request status, payment status)</td></tr>
+<tr><td><code>Input</code> / <code>Textarea</code></td><td>Form fields</td></tr>
+<tr><td><code>Select</code> / <code>Combobox</code></td><td>Dropdowns</td></tr>
+<tr><td><code>Dialog</code> / <code>Sheet</code></td><td>Modals and side panels</td></tr>
+<tr><td><code>Tabs</code></td><td>Section navigation within pages</td></tr>
+<tr><td><code>Table</code></td><td>Admin tables for requests, students, payments</td></tr>
+<tr><td><code>Avatar</code></td><td>Student and team member avatars</td></tr>
+<tr><td><code>Skeleton</code></td><td>Loading placeholders for all async content</td></tr>
+<tr><td><code>Toast</code></td><td>Success, error, info notifications</td></tr>
+<tr><td><code>Progress</code></td><td>Request progress bar</td></tr>
+<tr><td><code>Stepper</code></td><td>Multi-step request creation</td></tr>
+<tr><td><code>DropdownMenu</code></td><td>Context menus, user menu</td></tr>
+<tr><td><code>Tooltip</code></td><td>UI hints</td></tr>
+</tbody></table>
+
+<h3>Status Badge Colors</h3>
+
+<p>Map these consistently across the app:</p>
+
+<table><thead><tr><th>Status</th><th>Color</th></tr></thead><tbody>
+<tr><td>DRAFT</td><td>Gray</td></tr>
+<tr><td>SUBMITTED</td><td>Blue</td></tr>
+<tr><td>UNDER REVIEW</td><td>Indigo</td></tr>
+<tr><td>QUOTED</td><td>Purple</td></tr>
+<tr><td>AWAITING PAYMENT</td><td>Amber</td></tr>
+<tr><td>PAID</td><td>Teal</td></tr>
+<tr><td>ASSIGNED</td><td>Cyan</td></tr>
+<tr><td>IN PROGRESS</td><td>Blue</td></tr>
+<tr><td>REVIEW</td><td>Orange</td></tr>
+<tr><td>COMPLETED</td><td>Green</td></tr>
+<tr><td>CLOSED</td><td>Gray</td></tr>
+<tr><td>CANCELLED</td><td>Red</td></tr>
+<tr><td>REJECTED</td><td>Red</td></tr>
+<tr><td>DISPUTED</td><td>Red</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>7. Pages &amp; Features</h2>
+
+<h3>7.1 Landing Page</h3>
+
+<p><strong>Sections (in order):</strong></p>
+
+<ol>
+<li><strong>Navigation</strong> — Logo, nav links (Home, Services, How It Works, Resources, About), Sign In + Get Started buttons</li>
+<li><strong>Hero</strong> — Headline: <em>"Academic support, without the stress."</em> Primary CTA: <em>Get Help</em>, Secondary CTA: <em>Explore Services</em>. Include a product UI mockup or request card visual.</li>
+<li><strong>Services Preview</strong> — Cards for Academic Support, Technical Support, Project Support, Resources</li>
+<li><strong>How It Works</strong> — 4-step process: Submit → Review → Quote → Support</li>
+<li><strong>Trust / Stats</strong> — Placeholder metrics (students helped, requests completed, rating, availability). Label as demo data.</li>
+<li><strong>Testimonials</strong> — Realistic placeholder testimonials. Build with a data array so real data can be swapped in.</li>
+<li><strong>Final CTA</strong> — <em>"Stuck on something? Let UniAssist help you move forward."</em> + Get Started button</li>
+<li><strong>Footer</strong> — Links, socials, copyright</li>
+</ol>
+
+<h3>7.2 Authentication Pages</h3>
+
+<ul>
+<li><strong>Login</strong> — Email + password. Link to register and forgot password.</li>
+<li><strong>Register</strong> — Full name, email, phone, university, department, level, student ID, password, confirm password. Validation on all fields.</li>
+<li><strong>Forgot Password</strong> — Email input. Submit sends reset link (mock for now).</li>
+<li><strong>Reset Password</strong> — New password + confirm. Token from URL params.</li>
+<li><strong>Email Verification</strong> — Confirmation screen with resend option.</li>
+</ul>
+
+<h3>7.3 Student Dashboard (<code>/app</code>)</h3>
+
+<ul>
+<li>Time-based greeting: <em>"Good afternoon, Alex."</em></li>
+<li>Stats row: Active Requests, Pending Requests, Completed Requests, Total Spent</li>
+<li>Active request cards (title, category, status badge, progress bar, deadline, assigned member)</li>
+<li>Recent activity feed (quote received, payment confirmed, new message, etc.)</li>
+</ul>
+
+<h3>7.4 Create Request (<code>/app/requests/new</code>)</h3>
+
+<p>Multi-step wizard with progress indicator:</p>
+
+<table><thead><tr><th>Step</th><th>Content</th></tr></thead><tbody>
+<tr><td>1</td><td>Select Category (Academic, Technical, Project, Research &amp; Writing, Other)</td></tr>
+<tr><td>2</td><td>Request Details (title, description, subject/course, department, technology)</td></tr>
+<tr><td>3</td><td>Deadline (preferred date picker, urgency selector)</td></tr>
+<tr><td>4</td><td>File Upload (PDF, DOCX, PPTX, ZIP, images, source code)</td></tr>
+<tr><td>5</td><td>Contact Information (pre-filled from profile, editable)</td></tr>
+<tr><td>6</td><td>Review (summary of all inputs)</td></tr>
+<tr><td>7</td><td>Confirmation (success screen, generated reference e.g. <code>REQ-10482</code>)</td></tr>
+</tbody></table>
+
+<p>Use React Hook Form with Zod schemas per step. Preserve state across steps (Zustand or multi-step form context).</p>
+
+<h3>7.5 Request Details (<code>/app/requests/:id</code>)</h3>
+
+<ul>
+<li>Request header: ID, title, category, status badge</li>
+<li>Progress timeline showing all lifecycle states</li>
+<li>Description and deadline</li>
+<li>Assigned team member card</li>
+<li>Quote section (if quoted: price, services, accept/decline actions)</li>
+<li>Payment section (if awaiting payment: amount, proceed to pay button)</li>
+<li>Files tab: uploaded files with name, type, size, date</li>
+<li>Messages tab: conversation thread (see section 7.6)</li>
+<li>Deliverables tab: files from team</li>
+<li>Status history log</li>
+</ul>
+
+<h3>7.6 Messaging</h3>
+
+<p>Per-request conversation view:</p>
+
+<ul>
+<li>Message bubbles (student vs team member, different alignment/color)</li>
+<li>Timestamps on each message</li>
+<li>File attachment display inline</li>
+<li>System event messages styled differently (e.g. gray italic: <em>"Payment confirmed — 14 Jan 2026"</em>)</li>
+<li>Message input with attach file button</li>
+<li>Architecture must support future Supabase Realtime subscription</li>
+</ul>
+
+<h3>7.7 Payments (<code>/app/payments</code>)</h3>
+
+<ul>
+<li>List of payments with: request title, amount, status, transaction reference, date</li>
+<li>Payment detail page: full breakdown, Paystack reference, status</li>
+<li>The frontend must never confirm a payment — display "Awaiting confirmation" until backend confirms</li>
+</ul>
+
+<h3>7.8 Notifications</h3>
+
+<ul>
+<li>Bell icon in navbar with unread count badge</li>
+<li>Dropdown showing recent 5–10 notifications</li>
+<li>Full notifications page at <code>/app/notifications</code></li>
+<li>Notification types: request updates, quotes, payments, messages, files, completions</li>
+</ul>
+
+<h3>7.9 Resource Library</h3>
+
+<ul>
+<li>Category filter tabs: Study Guides, Past Questions, Programming, Research, Project Ideas, Career</li>
+<li>Resource cards: title, description, category, author, date, download/view button</li>
+<li>Build with a data array to allow future database connection</li>
+</ul>
+
+<h3>7.10 Admin Dashboard (<code>/admin</code>)</h3>
+
+<ul>
+<li>Stats: new requests, active requests, completed, revenue, pending payments</li>
+<li>Team workload section</li>
+<li>Recent activity feed</li>
+<li>Quick links to request queue</li>
+</ul>
+
+<h3>7.11 Admin Request Management (<code>/admin/requests</code>)</h3>
+
+<ul>
+<li>Full data table: request ID, student, category, status, deadline, assigned, date</li>
+<li>Search bar</li>
+<li>Filter by: status, category, date range, assigned member</li>
+<li>Sort by: date, status, deadline</li>
+<li>Row click → Request Details</li>
+</ul>
+
+<hr>
+
+<h2>8. State Management</h2>
+
+<h3>Guidelines</h3>
+
+<ul>
+<li>Use <code>useState</code> and <code>useContext</code> for local/simple UI state (modals open, tab selection, form steps)</li>
+<li>Use <strong>Zustand</strong> for application-level state that crosses multiple components</li>
+</ul>
+
+<h3>Suggested Zustand Stores</h3>
+
+<pre class="code-block"><code>// store/authStore.ts
+// currentUser, isAuthenticated, role, login(), logout()
+
+// store/requestStore.ts
+// activeRequests, draftRequest (multi-step form state), setDraftField()
+
+// store/notificationStore.ts
+// notifications[], unreadCount, markRead()
+
+// store/uiStore.ts
+// sidebarOpen, theme (light/dark), toasts</code></pre>
+
+<hr>
+
+<h2>9. Forms &amp; Validation</h2>
+
+<p>Use <strong>React Hook Form</strong> + <strong>Zod</strong> for all forms.</p>
+
+<h3>Example — Registration Schema</h3>
+
+<pre class="code-block"><code>// lib/validators/registerSchema.ts
+import { z } from 'zod'
+
+export const registerSchema = z.object({
+  fullName: z.string().min(2, 'Full name is required'),
+  email: z.string().email('Invalid email address'),
+  phone: z.string().min(7, 'Phone number is required'),
+  university: z.string().min(2, 'University is required'),
+  department: z.string().min(2, 'Department is required'),
+  level: z.string().min(1, 'Level is required'),
+  studentId: z.string().min(1, 'Student ID is required'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  confirmPassword: z.string(),
+}).refine(data =&gt; data.password === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
+})</code></pre>
+
+<h3>Example — Request Step 2 Schema</h3>
+
+<pre class="code-block"><code>export const requestDetailsSchema = z.object({
+  title: z.string().min(5, 'Title must be at least 5 characters'),
+  description: z.string().min(20, 'Please provide more detail'),
+  subject: z.string().optional(),
+  department: z.string().optional(),
+  technology: z.string().optional(),
+})</code></pre>
+
+<hr>
+
+<h2>10. Mock Data Strategy</h2>
+
+<p>All mock data lives in <code>src/mock/</code>. Export typed arrays matching the types defined in <code>src/types/</code>.</p>
+
+<pre class="code-block"><code>src/mock/
+├── requests.ts
+├── students.ts
+├── messages.ts
+├── payments.ts
+├── resources.ts
+├── notifications.ts
+└── team.ts</code></pre>
+
+<p>Example:</p>
+
+<pre class="code-block"><code>// mock/requests.ts
+import { Request } from '@/types/request'
+
+export const mockRequests: Request[] = [
+  {
+    id: 'REQ-10482',
+    title: 'Help with Data Structures Assignment',
+    category: 'academic',
+    status: 'IN_PROGRESS',
+    deadline: '2026-02-01',
+    createdAt: '2026-01-10',
+    assignedTo: { name: 'Jordan Lee', avatar: '/avatars/jordan.jpg' },
+    progress: 60,
+  },
+  // ...
+]</code></pre>
+
+<hr>
+
+<h2>11. Backend Integration Readiness</h2>
+
+<p>The frontend must be built for easy backend connection. Follow this pattern:</p>
+
+<h3>Service Layer</h3>
+
+<p>Never call Supabase or any API directly from components. All data calls go through <code>src/services/</code>.</p>
+
+<pre class="code-block"><code>// services/requestService.ts
+export const getRequests = async (userId: string) =&gt; {
+  // Phase 1: return mockRequests
+  // Phase 2: return supabase.from('requests').select('*').eq('student_id', userId)
+}</code></pre>
+
+<h3>Type Definitions</h3>
+
+<p>Define all data types in <code>src/types/</code>. These must mirror the backend data models.</p>
+
+<pre class="code-block"><code>// types/request.ts
+export type RequestStatus =
+  | 'DRAFT' | 'SUBMITTED' | 'UNDER_REVIEW' | 'QUOTED'
+  | 'AWAITING_PAYMENT' | 'PAID' | 'ASSIGNED' | 'IN_PROGRESS'
+  | 'REVIEW' | 'COMPLETED' | 'CLOSED' | 'CANCELLED' | 'REJECTED' | 'DISPUTED'
+
+export interface Request {
+  id: string
+  studentId: string
+  title: string
+  description: string
+  category: RequestCategory
+  status: RequestStatus
+  deadline: string
+  createdAt: string
+  updatedAt: string
+  assignedTo?: TeamMember
+  progress?: number
+  quoteId?: string
+  paymentId?: string
+}</code></pre>
+
+<hr>
+
+<h2>12. Component Conventions</h2>
+
+<ul>
+<li>Use named exports for all components</li>
+<li>One component per file</li>
+<li>Co-locate styles within the component using Tailwind classes</li>
+<li>No inline styles unless absolutely necessary</li>
+<li>Props must be typed with TypeScript interfaces</li>
+<li>Use <code>cn()</code> utility from shadcn for conditional class merging</li>
+</ul>
+
+<pre class="code-block"><code>// components/common/StatusBadge.tsx
+interface StatusBadgeProps {
+  status: RequestStatus
+}
+
+export const StatusBadge = ({ status }: StatusBadgeProps) =&gt; {
+  const variants: Record&lt;RequestStatus, string&gt; = {
+    IN_PROGRESS: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    COMPLETED: 'bg-green-500/10 text-green-400 border-green-500/20',
+    // ...
+  }
+  return (
+    &lt;span className={cn('px-2 py-1 rounded text-xs font-medium border', variants[status])}&gt;
+      {status.replace(/_/g, ' ')}
+    &lt;/span&gt;
+  )
+}</code></pre>
+
+<hr>
+
+<h2>13. Responsive Design</h2>
+
+<p>The application must work on desktop, laptop, tablet, and mobile. Mobile is not a compressed desktop view.</p>
+
+<h3>Breakpoints (Tailwind defaults)</h3>
+
+<table><thead><tr><th>Breakpoint</th><th>Width</th></tr></thead><tbody>
+<tr><td><code>sm</code></td><td>640px</td></tr>
+<tr><td><code>md</code></td><td>768px</td></tr>
+<tr><td><code>lg</code></td><td>1024px</td></tr>
+<tr><td><code>xl</code></td><td>1280px</td></tr>
+</tbody></table>
+
+<h3>Navigation</h3>
+
+<ul>
+<li>Desktop: full horizontal navbar</li>
+<li>Mobile: hamburger menu → slide-out drawer</li>
+</ul>
+
+<h3>Dashboards</h3>
+
+<ul>
+<li>Desktop: sidebar + main content</li>
+<li>Tablet: collapsible sidebar</li>
+<li>Mobile: bottom navigation bar or drawer</li>
+</ul>
+
+<h3>Tables</h3>
+
+<ul>
+<li>Desktop: full data table</li>
+<li>Mobile: card-based list view</li>
+</ul>
+
+<hr>
+
+<h2>14. Performance Guidelines</h2>
+
+<ul>
+<li>Lazy-load all route pages using <code>React.lazy</code> + <code>Suspense</code></li>
+<li>Use <code>Skeleton</code> components for all loading states (no spinner-only states)</li>
+<li>Memoize expensive components with <code>React.memo</code> where appropriate</li>
+<li>Avoid prop drilling beyond 2 levels — use context or Zustand</li>
+<li>Keep bundle size lean — do not install libraries that can be done with Tailwind or existing stack</li>
+</ul>
+
+<hr>
+
+<h2>15. Developer Notes</h2>
+
+<ul>
+<li>Each developer builds their own independent implementation in their own repository</li>
+<li>All three must follow the same routing structure and type definitions</li>
+<li>This ensures that when the winning frontend is selected, the team can connect the backend without restructuring the data layer</li>
+<li>The multi-step request creation form and the request details page are the most complex screens — prioritize getting them right</li>
+<li>Messaging UI should be built with Supabase Realtime in mind even though it will use mock data now</li>
+<li>Payment pages must never allow frontend-side payment confirmation</li>
+</ul>
+
+<hr>
+
+<p><em>Document maintained by Balerioncodes. Update version number when making significant changes.</em></p>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="doc-footer">
+    <span class="footer-left">UNIASSIST &nbsp;·&nbsp; <span class="footer-teal">BALERIONCODES</span> &nbsp;·&nbsp; FRONTEND SPECIFICATION</span>
+    <span class="footer-right">DOC v1.0 &nbsp;·&nbsp; 2026</span>
+  </div>
+
+</div>
+</body>
+</html>

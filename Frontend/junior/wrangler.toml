@@ -1,0 +1,14 @@
+name = "uniassist"
+compatibility_date = "2026-09-16"
+compatibility_flags = ["nodejs_compat"]
+
+main = ".output/server/index.mjs"
+no_bundle = true
+
+[assets]
+directory = ".output/public"
+binding = "ASSETS"
+
+[[rules]]
+type = "ESModule"
+globs = ["**/*.mjs", "**/*.js"]

@@ -11,6 +11,25 @@
 }
 .staff-header-logout:hover { background: rgba(247,241,228,.07); }
 
+/* Sign out button — blends with navbar */
+.signout-btn {
+  background: transparent;
+  border: 1px solid rgba(247,241,228,.25);
+  color: rgba(247,241,228,.8);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  padding: 0.35rem 0.85rem;
+  border-radius: 8px;
+  cursor: pointer;
+  min-height: 34px;
+  transition: background .15s, color .15s;
+}
+.signout-btn:hover {
+  background: rgba(247,241,228,.1);
+  color: #f7f1e4;
+}
+
 /* Dashboard */
 .staff-hero { margin-bottom: 1rem; }
 .staff-hero h1 { margin: 0 0 0.3rem; font-size: 1.7rem; }

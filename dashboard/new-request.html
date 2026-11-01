@@ -69,13 +69,29 @@
 
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
             <div class="field">
-              <label for="class_year">Class / Year</label>
-              <input type="text" id="class_year" name="class_year" required placeholder="e.g. 300L Computer Eng." />
+              <label for="program">Programme</label>
+              <select id="program" name="program" required>
+                <option value="">— Select programme —</option>
+                <option value="Cyber Security">Cyber Security</option>
+                <option value="Information Systems">Information Systems</option>
+                <option value="Computer Science and Engineering">Computer Science and Engineering</option>
+                <option value="AI and Robotics Engineering">AI and Robotics Engineering</option>
+              </select>
             </div>
             <div class="field">
-              <label for="deadline">Your deadline</label>
-              <input type="date" id="deadline" name="deadline" />
+              <label for="class_year">Year</label>
+              <select id="class_year" name="class_year" required>
+                <option value="">— Select year —</option>
+                <option value="Year 1">Year 1</option>
+                <option value="Year 2">Year 2</option>
+                <option value="Year 3">Year 3</option>
+                <option value="Year 4">Year 4</option>
+              </select>
             </div>
+          </div>
+          <div class="field">
+            <label for="deadline">Your deadline</label>
+            <input type="date" id="deadline" name="deadline" />
           </div>
 
           <div class="field">
@@ -132,11 +148,12 @@
       const service     = form.service.value;
       const title       = form.title.value.trim();
       const description = form.description.value.trim();
-      const classYear   = form.class_year.value.trim();
+      const program     = form.program.value;
+      const classYear   = form.class_year.value;
       const deadline    = form.deadline.value || null;
       const fileInput   = form.file;
 
-      if (!service || !title || !description || !classYear) {
+      if (!service || !title || !description || !program || !classYear) {
         errEl.textContent = 'Please fill all required fields.';
         errEl.hidden = false;
         return;
@@ -167,7 +184,7 @@
             service,
             title,
             description,
-            class_year:  classYear,
+            class_year:  `${program} — ${classYear}`,
             deadline,
             file_url:    fileUrl,
             status:      'pending',

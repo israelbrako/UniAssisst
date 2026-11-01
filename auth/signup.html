@@ -102,7 +102,7 @@
       submitBtn.textContent = 'Create account';
       submitBtn.disabled = false;
 
-      if (error) return showError(error.message);
+    if (error) return showError(error.message);
 
       // Create the profile row
       if (data.user) {
@@ -115,10 +115,19 @@
         });
       }
 
-      showSuccess('Account created! You can now sign in.');
-      document.getElementById('spam-notice').hidden = true;
-      form.reset();
-      setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+      // Hide the form, show confirmation notice
+      form.style.display = 'none';
+      document.querySelector('.form-footer').style.display = 'none';
+      succEl.innerHTML = `
+        <strong>Account created!</strong><br>
+        We've sent a confirmation email to <strong>${email}</strong>.<br><br>
+        Click the link in the email to activate your account, then come back to sign in.<br><br>
+        <span style="color:#5a4200;background:#fef9ec;border:1px solid #e8c84a;border-radius:6px;padding:0.5rem 0.7rem;display:block;margin-top:0.5rem;font-size:0.88rem;">
+          📬 <strong>Don't see it?</strong> Check your <strong>spam or junk folder</strong> — confirmation emails sometimes land there. Mark it as "Not spam".
+        </span>
+        <a href="login.html" style="display:inline-block;margin-top:1rem;color:var(--green);font-weight:600;">← Go to sign in</a>
+      `;
+      succEl.hidden = false;
     });
   </script>
 </body>

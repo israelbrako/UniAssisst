@@ -168,7 +168,7 @@ export function buildNavbar(opts = {}) {
       <li><a href="${l.href}" class="${active === l.key ? 'is-active' : ''}">${escHtml(l.label)}</a></li>
     `).join('') + `
       <li id="notif-bell-container"></li>
-      <li><button class="staff-header-logout" id="signout-btn">Sign out</button></li>
+      <li><button class="signout-btn" id="signout-btn">Sign out</button></li>
     `;
   }
 

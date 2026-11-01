@@ -54,6 +54,16 @@
       else window.location.href = '/dashboard/index.html';
     });
 
+    // Show confirmation success message if redirected from email link
+    const hash = new URLSearchParams(window.location.hash.replace('#', '?'));
+    const type = hash.get('type');
+    if (type === 'signup' || type === 'email_change') {
+      const succBanner = document.createElement('div');
+      succBanner.className = 'form-success';
+      succBanner.innerHTML = '✅ Email confirmed! You can now sign in.';
+      document.getElementById('form-error').insertAdjacentElement('afterend', succBanner);
+    }
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       errEl.hidden = true;

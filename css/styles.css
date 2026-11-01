@@ -545,7 +545,24 @@ input, textarea, select {
   .app-main { padding: 2rem 0 4rem; }
 }
 
-/* ── Webverse credit ─────────────────────────────────────────── */
+/* Sign out button — blends with navbar */
+.signout-btn {
+  background: transparent;
+  border: 1px solid rgba(247,241,228,.25);
+  color: rgba(247,241,228,.8);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  padding: 0.35rem 0.85rem;
+  border-radius: 8px;
+  cursor: pointer;
+  min-height: 34px;
+  transition: background .15s, color .15s;
+}
+.signout-btn:hover {
+  background: rgba(247,241,228,.1);
+  color: #f7f1e4;
+}
 .webverse-credit {
   display: inline-flex; align-items: center; gap: 0.6rem;
   text-decoration: none; opacity: 0.9; transition: opacity .15s;

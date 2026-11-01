@@ -44,7 +44,6 @@ h1, h2, h3, .logo {
 .site-header {
   position: sticky; top: 0; z-index: 40;
   background: rgba(12, 36, 28, 0.97);
-  border-bottom: 1px solid rgba(198, 163, 90, 0.22);
   padding-top: env(safe-area-inset-top, 0px);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -60,9 +59,8 @@ h1, h2, h3, .logo {
   flex-shrink: 0;
 }
 .logo-img {
-  width: 36px; height: 36px; border-radius: 8px;
+  width: 48px; height: 48px; border-radius: 8px;
   object-fit: cover; display: block;
-  border: 1.5px solid rgba(198,163,90,.5);
 }
 
 /* Desktop inline nav */
@@ -537,4 +535,20 @@ input, textarea, select {
 }
 @media (min-width: 800px) {
   .app-main { padding: 2rem 0 4rem; }
+}
+
+/* ── Webverse credit ─────────────────────────────────────────── */
+.webverse-credit {
+  display: flex; align-items: center; gap: 0.45rem;
+  opacity: 0.55; transition: opacity .15s;
+  text-decoration: none;
+}
+.webverse-credit:hover { opacity: 0.9; }
+.webverse-credit img {
+  height: 16px; width: auto; display: block;
+  filter: brightness(0) invert(1);
+}
+.webverse-credit span {
+  font-size: 0.72rem; color: rgba(247,241,228,.7);
+  letter-spacing: 0.03em; white-space: nowrap;
 }

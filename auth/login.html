@@ -76,9 +76,16 @@
         return;
       }
 
-      const profile = await getProfile(data.user.id).catch(() => null);
-      if (profile?.role === 'admin') window.location.href = '/admin/index.html';
-      else window.location.href = '/dashboard/index.html';
+      try {
+        const profile = await getProfile(data.user.id);
+        if (profile?.role === 'admin') window.location.href = '/admin/index.html';
+        else window.location.href = '/dashboard/index.html';
+      } catch (profileErr) {
+        // Show the exact error instead of silently redirecting
+        errEl.textContent = 'Profile error: ' + (profileErr?.message ?? JSON.stringify(profileErr));
+        errEl.hidden = false;
+        submitBtn.disabled = false;
+      }
     });
   </script>
 </body>

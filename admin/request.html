@@ -379,11 +379,19 @@
         input.value = '';
         sendBtn.disabled = true;
 
-        await supabase.from('messages').insert({
+        const { error } = await supabase.from('messages').insert({
           request_id: reqId,
           sender_id:  currentAdmin.user.id,
           content,
         });
+
+        if (error) {
+          console.error('Send message error:', error);
+          alert('Could not send message: ' + error.message);
+          input.value = content;
+          sendBtn.disabled = false;
+          return;
+        }
 
         // Notify student of new message
         await supabase.from('notifications').insert({
@@ -393,6 +401,7 @@
           body:       `${currentAdmin.profile.full_name} sent you a message on "${currentReq.title}".`,
         });
 
+        await loadMessages();
         sendBtn.disabled = false;
         input.focus();
       }
@@ -424,9 +433,22 @@
 
     function subscribeRealtime() {
       supabase.channel('admin-req-' + reqId)
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `request_id=eq.${reqId}` }, () => loadMessages())
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'status_updates', filter: `request_id=eq.${reqId}` }, () => loadTimeline())
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `request_id=eq.${reqId}`,
+        }, () => loadMessages())
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'status_updates',
+          filter: `request_id=eq.${reqId}`,
+        }, () => loadTimeline())
         .subscribe();
+
+      // Polling fallback every 3 seconds
+      setInterval(() => loadMessages(), 3000);
     }
 
     init();

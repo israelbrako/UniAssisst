@@ -40,6 +40,9 @@
 
       <div class="panel">
         <div id="form-error" class="form-error" hidden></div>
+        <div id="form-success" class="form-success" hidden>
+          ✅ Request submitted! Redirecting you to track it…
+        </div>
 
         <form id="request-form" novalidate>
           <div class="field">
@@ -174,7 +177,15 @@
 
         if (error) throw error;
 
-        window.location.href = `request.html?id=${req.id}&new=1`;
+        // Show success before redirect so user knows it worked
+        const succEl = document.getElementById('form-success');
+        succEl.hidden = false;
+        btn.textContent = 'Submitted!';
+        form.reset();
+
+        setTimeout(() => {
+          window.location.href = `request.html?id=${req.id}&new=1`;
+        }, 1200);
       } catch (err) {
         errEl.textContent = err.message || 'Could not submit. Please try again.';
         errEl.hidden = false;

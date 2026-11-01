@@ -115,9 +115,10 @@
         });
       }
 
-      showSuccess('Account created! Check your inbox to confirm your email — if you don\'t see it within a minute, check your spam or junk folder.');
-      document.getElementById('spam-notice').hidden = false;
+      showSuccess('Account created! You can now sign in.');
+      document.getElementById('spam-notice').hidden = true;
       form.reset();
+      setTimeout(() => { window.location.href = 'login.html'; }, 1500);
     });
   </script>
 </body>

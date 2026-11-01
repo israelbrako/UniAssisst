@@ -11,10 +11,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/styles.css?v=5" />
+  <style>
+    /* Hide page content until auth check completes — prevents flash */
+    .app-main { opacity: 0; transition: opacity .2s; }
+    .app-main.ready { opacity: 1; }
+  </style>
 </head>
 <body class="app-shell">
 
-  <!-- Top nav (populated by JS) -->
   <header class="site-header">
     <div class="container header-inner">
       <a class="logo" href="../index.html">
@@ -29,25 +33,23 @@
   </header>
   <nav class="nav-drawer" id="nav-drawer" aria-label="Main navigation"></nav>
 
-  <main class="app-main">
+  <main class="app-main" id="app-main">
     <div class="container">
       <div class="page-hd">
         <div>
-          <h1 id="greeting">My Requests</h1>
-          <p>Track everything you've sent to the team.</p>
+          <h1 id="greeting"></h1>
+          <p id="greeting-sub">Welcome back.</p>
         </div>
         <a href="new-request.html" class="btn btn-primary">+ New request</a>
       </div>
 
-      <!-- Stats strip -->
-      <div class="stat-strip" id="stat-strip">
-        <div class="stat-tile"><b id="s-total">—</b><span>Total</span></div>
-        <div class="stat-tile"><b id="s-active">—</b><span>Active</span></div>
-        <div class="stat-tile"><b id="s-completed">—</b><span>Completed</span></div>
-        <div class="stat-tile"><b id="s-pending">—</b><span>Pending</span></div>
+      <div class="stat-strip">
+        <div class="stat-tile"><b id="s-total">0</b><span>Total</span></div>
+        <div class="stat-tile"><b id="s-active">0</b><span>Active</span></div>
+        <div class="stat-tile"><b id="s-completed">0</b><span>Completed</span></div>
+        <div class="stat-tile"><b id="s-pending">0</b><span>Pending</span></div>
       </div>
 
-      <!-- Filter bar -->
       <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem">
         <button class="btn btn-ghost dark filter-btn is-active" data-filter="all" style="min-height:36px;padding:0.4rem 0.85rem;font-size:0.88rem">All</button>
         <button class="btn btn-ghost dark filter-btn" data-filter="pending,assigned" style="min-height:36px;padding:0.4rem 0.85rem;font-size:0.88rem">Active</button>
@@ -56,10 +58,7 @@
         <button class="btn btn-ghost dark filter-btn" data-filter="declined" style="min-height:36px;padding:0.4rem 0.85rem;font-size:0.88rem">Declined</button>
       </div>
 
-      <!-- Request list -->
-      <div id="req-list" class="req-list">
-        <p style="color:var(--muted)">Loading…</p>
-      </div>
+      <div id="req-list" class="req-list"></div>
     </div>
   </main>
 
@@ -68,7 +67,6 @@
       <p>© <span id="year"></span> UniAssist · ASCES Department</p>
       <p><a href="mailto:webverse.uniassist@gmail.com">webverse.uniassist@gmail.com</a></p>
     </div>
-    <div class="container" style="padding-top:0.6rem;border-top:1px solid rgba(247,241,228,.08);margin-top:0.6rem">
     <div class="container footer-credit-row">
       <div class="webverse-credit">
         <span>Developed by</span>
@@ -76,7 +74,6 @@
           <img src="../img/webverse-logo-color.png" alt="WebVerse" />
         </div>
       </div>
-    </div>
     </div>
   </footer>
 
@@ -89,34 +86,52 @@
     let currentFilter = 'all';
 
     async function init() {
-      const auth = await requireAuth('../auth/login.html');
-      if (!auth) return;
-      const { user, profile } = auth;
+      try {
+        const auth = await requireAuth('../auth/login.html');
+        if (!auth) return;
+        const { user, profile } = auth;
 
-      // Redirect admins to their own dashboard
-      if (profile.role === 'admin') { window.location.href = '../admin/index.html'; return; }
+        if (profile.role === 'admin') { window.location.href = '../admin/index.html'; return; }
 
-      document.getElementById('greeting').textContent = `Hey, ${profile.full_name.split(' ')[0]}`;
-      document.getElementById('year').textContent = new Date().getFullYear();
+        // Set greeting immediately so there's no flash
+        const firstName = profile.full_name?.split(' ')[0] ?? 'there';
+        document.getElementById('greeting').textContent = `Hey, ${firstName} 👋`;
+        document.getElementById('greeting-sub').textContent = `Here's everything you've sent to the team.`;
+        document.getElementById('year').textContent = new Date().getFullYear();
 
-      buildNavbar({ role: 'student', name: profile.full_name, userId: user.id, active: 'dashboard', basePath: '../' });
+        buildNavbar({ role: 'student', name: profile.full_name, userId: user.id, active: 'dashboard', basePath: '../' });
 
-      await loadRequests(user.id);
-      setupFilters();
-      subscribeRealtime(user.id);
+        // Show page now that we have the user
+        document.getElementById('app-main').classList.add('ready');
+
+        await loadRequests(user.id);
+        setupFilters();
+        subscribeRealtime(user.id);
+
+      } catch (err) {
+        console.error('Dashboard init error:', err);
+        // If profile doesn't exist yet, sign out and send to signup
+        await supabase.auth.signOut();
+        window.location.href = '../auth/login.html';
+      }
     }
 
     async function loadRequests(userId) {
+      const list = document.getElementById('req-list');
+      list.innerHTML = `<p style="color:var(--muted);font-size:0.9rem">Fetching your requests…</p>`;
+
       const { data, error } = await supabase
         .from('requests')
-        .select(`
-          id, service, title, status, created_at, deadline,
-          assigned_to ( full_name )
-        `)
+        .select(`id, service, title, status, created_at, deadline, assigned_to ( full_name )`)
         .eq('student_id', userId)
         .order('created_at', { ascending: false });
 
-      if (error) { console.error(error); return; }
+      if (error) {
+        list.innerHTML = `<div class="form-error">Could not load your requests. Please refresh the page.</div>`;
+        console.error('loadRequests error:', error);
+        return;
+      }
+
       allRequests = data ?? [];
       updateStats();
       renderList();
@@ -127,7 +142,6 @@
       const inProg    = allRequests.filter(r => ['in_progress','review'].includes(r.status)).length;
       const completed = allRequests.filter(r => r.status === 'completed').length;
       const pending   = allRequests.filter(r => r.status === 'pending').length;
-
       document.getElementById('s-total').textContent     = allRequests.length;
       document.getElementById('s-active').textContent    = active + inProg;
       document.getElementById('s-completed').textContent = completed;
@@ -157,7 +171,7 @@
           </div>
           <div class="req-card-meta">
             <span>${escHtml(r.service)}</span>
-            ${r.assigned_to ? `<span>Assigned to ${escHtml(r.assigned_to.full_name)}</span>` : ''}
+            ${r.assigned_to ? `<span>With ${escHtml(r.assigned_to.full_name)}</span>` : ''}
             ${r.deadline ? `<span>Due ${escHtml(r.deadline)}</span>` : ''}
             <span>${timeAgo(r.created_at)}</span>
           </div>

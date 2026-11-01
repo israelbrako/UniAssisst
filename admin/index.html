@@ -1,0 +1,176 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0c241c" />
+  <link rel="icon" type="image/jpeg" href="../img/umat.jpg" />
+  <link rel="apple-touch-icon" href="../img/umat.jpg" />
+  <title>Queue — UniAssist Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css?v=5" />
+</head>
+<body class="app-shell">
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="../index.html">
+        <img class="logo-img" src="../img/umat.jpg" alt="UMAT logo" />
+        Staff
+      </a>
+      <ul class="top-nav" role="list"></ul>
+      <button class="menu-toggle" type="button" aria-controls="nav-drawer" aria-expanded="false" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+  <nav class="nav-drawer" id="nav-drawer"></nav>
+
+  <main class="app-main">
+    <div class="container">
+      <div class="page-hd">
+        <div>
+          <h1>Queue</h1>
+          <p>All incoming and assigned requests waiting for action.</p>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stat-strip">
+        <div class="stat-tile"><b id="s-pending">—</b><span>Pending</span></div>
+        <div class="stat-tile"><b id="s-assigned">—</b><span>Assigned</span></div>
+        <div class="stat-tile"><b id="s-active">—</b><span>In Progress</span></div>
+        <div class="stat-tile"><b id="s-today">—</b><span>Today</span></div>
+      </div>
+
+      <!-- Queue table -->
+      <div class="panel" style="overflow-x:auto">
+        <div class="panel-hd">
+          <h2>Requests</h2>
+          <div style="display:flex;gap:0.5rem;align-items:center">
+            <select id="filter-status" style="min-height:32px;padding:0.2rem 0.6rem;border:1px solid var(--line);border-radius:6px;font:inherit;font-size:0.85rem">
+              <option value="">All statuses</option>
+              <option value="pending">Pending</option>
+              <option value="assigned">Assigned</option>
+              <option value="accepted">Accepted</option>
+              <option value="in_progress">In Progress</option>
+              <option value="review">Review</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="queue-wrap">
+          <p style="color:var(--muted)">Loading…</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>© <span id="year"></span> UniAssist · ASCES Department</p>
+    </div>
+  </footer>
+
+  <script src="../js/main.js?v=5"></script>
+  <script type="module">
+    import { supabase, requireAdmin } from '../js/lib/supabase.js';
+    import { badge, timeAgo, fmtDate, buildNavbar, escHtml } from '../js/lib/ui.js';
+
+    let allRequests = [];
+
+    async function init() {
+      const auth = await requireAdmin('login.html');
+      if (!auth) return;
+      const { user, profile } = auth;
+
+      document.getElementById('year').textContent = new Date().getFullYear();
+      buildNavbar({ role: 'admin', name: profile.full_name, userId: user.id, active: 'queue', basePath: '../' });
+
+      await loadQueue();
+      subscribeRealtime();
+
+      document.getElementById('filter-status').addEventListener('change', renderTable);
+    }
+
+    async function loadQueue() {
+      const { data, error } = await supabase
+        .from('requests')
+        .select(`
+          id, service, title, status, created_at, deadline,
+          student:student_id ( full_name, email ),
+          assigned_to ( full_name )
+        `)
+        .not('status', 'in', '("completed","declined")')
+        .order('created_at', { ascending: true });
+
+      if (error) { console.error(error); return; }
+      allRequests = data ?? [];
+      updateStats();
+      renderTable();
+    }
+
+    function updateStats() {
+      document.getElementById('s-pending').textContent  = allRequests.filter(r => r.status === 'pending').length;
+      document.getElementById('s-assigned').textContent = allRequests.filter(r => r.status === 'assigned').length;
+      document.getElementById('s-active').textContent   = allRequests.filter(r => ['accepted','in_progress','review'].includes(r.status)).length;
+      const today = new Date().toDateString();
+      document.getElementById('s-today').textContent    = allRequests.filter(r => new Date(r.created_at).toDateString() === today).length;
+    }
+
+    function renderTable() {
+      const filterVal = document.getElementById('filter-status').value;
+      const rows      = filterVal ? allRequests.filter(r => r.status === filterVal) : allRequests;
+      const wrap      = document.getElementById('queue-wrap');
+
+      if (rows.length === 0) {
+        wrap.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg><p>Queue is clear.</p></div>`;
+        return;
+      }
+
+      wrap.innerHTML = `
+        <table class="req-table">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Request</th>
+              <th>Deadline</th>
+              <th>Assigned to</th>
+              <th>Status</th>
+              <th>When</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map(r => `
+              <tr>
+                <td>
+                  <div class="name">${escHtml(r.student?.full_name ?? '—')}</div>
+                  <div class="sub">${escHtml(r.student?.email ?? '')}</div>
+                </td>
+                <td>
+                  <div class="name">${escHtml(r.title)}</div>
+                  <div class="sub">${escHtml(r.service)}</div>
+                </td>
+                <td>${fmtDate(r.deadline)}</td>
+                <td>${r.assigned_to ? escHtml(r.assigned_to.full_name) : '<span style="color:var(--muted)">Unassigned</span>'}</td>
+                <td>${badge(r.status)}</td>
+                <td style="white-space:nowrap">${timeAgo(r.created_at)}</td>
+                <td><a href="request.html?id=${r.id}" style="font-weight:600;white-space:nowrap">Open →</a></td>
+              </tr>`).join('')}
+          </tbody>
+        </table>`;
+    }
+
+    function subscribeRealtime() {
+      supabase.channel('admin-queue')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, () => loadQueue())
+        .subscribe();
+    }
+
+    init();
+  </script>
+</body>
+</html>

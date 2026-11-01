@@ -1,0 +1,126 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0c241c" />
+  <link rel="icon" type="image/jpeg" href="../img/umat.jpg" />
+  <link rel="apple-touch-icon" href="../img/umat.jpg" />
+  <title>My Work — UniAssist Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css?v=5" />
+</head>
+<body class="app-shell">
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="../index.html">
+        <img class="logo-img" src="../img/umat.jpg" alt="UMAT logo" />
+        Staff
+      </a>
+      <ul class="top-nav" role="list"></ul>
+      <button class="menu-toggle" type="button" aria-controls="nav-drawer" aria-expanded="false" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+  <nav class="nav-drawer" id="nav-drawer"></nav>
+
+  <main class="app-main">
+    <div class="container">
+      <div class="page-hd">
+        <div>
+          <h1 id="page-title">My Work</h1>
+          <p>Requests currently assigned to you.</p>
+        </div>
+      </div>
+
+      <div class="stat-strip">
+        <div class="stat-tile"><b id="s-accepted">—</b><span>Accepted</span></div>
+        <div class="stat-tile"><b id="s-inprog">—</b><span>In Progress</span></div>
+        <div class="stat-tile"><b id="s-review">—</b><span>Review</span></div>
+        <div class="stat-tile"><b id="s-done">—</b><span>Completed (all time)</span></div>
+      </div>
+
+      <div class="req-list" id="work-list">
+        <p style="color:var(--muted)">Loading…</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>© <span id="year"></span> UniAssist · ASCES Department</p>
+    </div>
+  </footer>
+
+  <script src="../js/main.js?v=5"></script>
+  <script type="module">
+    import { supabase, requireAdmin } from '../js/lib/supabase.js';
+    import { badge, timeAgo, fmtDate, buildNavbar, escHtml } from '../js/lib/ui.js';
+
+    async function init() {
+      const auth = await requireAdmin('login.html');
+      if (!auth) return;
+      const { user, profile } = auth;
+
+      document.getElementById('year').textContent = new Date().getFullYear();
+      document.getElementById('page-title').textContent = `My Work — ${profile.full_name.split(' ')[0]}`;
+      buildNavbar({ role: 'admin', name: profile.full_name, userId: user.id, active: 'my-work', basePath: '../' });
+
+      await loadWork(user.id);
+
+      supabase.channel('my-work-' + user.id)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'requests', filter: `assigned_to=eq.${user.id}` }, () => loadWork(user.id))
+        .subscribe();
+    }
+
+    async function loadWork(userId) {
+      const { data, error } = await supabase
+        .from('requests')
+        .select(`
+          id, service, title, status, created_at, deadline,
+          student:student_id ( full_name, email )
+        `)
+        .eq('assigned_to', userId)
+        .not('status', 'in', '("declined","pending")')
+        .order('created_at', { ascending: false });
+
+      if (error) { console.error(error); return; }
+      const all = data ?? [];
+
+      // Stats
+      document.getElementById('s-accepted').textContent = all.filter(r => r.status === 'accepted').length;
+      document.getElementById('s-inprog').textContent   = all.filter(r => r.status === 'in_progress').length;
+      document.getElementById('s-review').textContent   = all.filter(r => r.status === 'review').length;
+      document.getElementById('s-done').textContent     = all.filter(r => r.status === 'completed').length;
+
+      const active = all.filter(r => !['completed','declined'].includes(r.status));
+      const list   = document.getElementById('work-list');
+
+      if (active.length === 0) {
+        list.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><p>No active work right now. Nice.</p></div>`;
+        return;
+      }
+
+      list.innerHTML = active.map(r => `
+        <a class="req-card" href="request.html?id=${r.id}">
+          <div class="req-card-top">
+            <h3>${escHtml(r.title)}</h3>
+            ${badge(r.status)}
+          </div>
+          <div class="req-card-meta">
+            <span>${escHtml(r.service)}</span>
+            <span>${escHtml(r.student?.full_name ?? '')}</span>
+            ${r.deadline ? `<span>Due ${escHtml(r.deadline)}</span>` : ''}
+            <span>${timeAgo(r.created_at)}</span>
+          </div>
+        </a>`).join('');
+    }
+
+    init();
+  </script>
+</body>
+</html>

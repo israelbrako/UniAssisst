@@ -1,0 +1,179 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0c241c" />
+  <link rel="icon" type="image/jpeg" href="../img/umat.jpg" />
+  <link rel="apple-touch-icon" href="../img/umat.jpg" />
+  <title>New Request — UniAssist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css?v=5" />
+</head>
+<body class="app-shell">
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="../index.html">
+        <img class="logo-img" src="../img/umat.jpg" alt="UMAT logo" />
+        UniAssist
+      </a>
+      <ul class="top-nav" role="list"></ul>
+      <button class="menu-toggle" type="button" aria-controls="nav-drawer" aria-expanded="false" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+  <nav class="nav-drawer" id="nav-drawer"></nav>
+
+  <main class="app-main">
+    <div class="container" style="max-width:680px">
+      <div class="page-hd">
+        <div>
+          <h1>New request</h1>
+          <p>Tell us what you need — the more detail, the faster we can help.</p>
+        </div>
+        <a href="index.html" class="btn btn-ghost dark" style="align-self:flex-start">← Back</a>
+      </div>
+
+      <div class="panel">
+        <div id="form-error" class="form-error" hidden></div>
+
+        <form id="request-form" novalidate>
+          <div class="field">
+            <label for="service">Type of help</label>
+            <select id="service" name="service" required>
+              <option value="">— Select a service —</option>
+              <option value="Assignments">Assignments</option>
+              <option value="Projects">Projects</option>
+              <option value="One-on-One Tutorial">One-on-One Tutorial</option>
+              <option value="Group Tutorial">Group Tutorial</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="title">Short title</label>
+            <input type="text" id="title" name="title" required maxlength="120" placeholder="e.g. Help with Data Structures assignment" />
+          </div>
+
+          <div class="field">
+            <label for="description">Full description</label>
+            <textarea id="description" name="description" rows="5" required
+              placeholder="Describe exactly what you need help with. Include the module name, what you're stuck on, and any other relevant details."></textarea>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+            <div class="field">
+              <label for="class_year">Class / Year</label>
+              <input type="text" id="class_year" name="class_year" required placeholder="e.g. 300L Computer Eng." />
+            </div>
+            <div class="field">
+              <label for="deadline">Your deadline</label>
+              <input type="date" id="deadline" name="deadline" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="file">Attach a file <span style="font-weight:400;color:var(--muted)">(optional — PDF, DOCX, images)</span></label>
+            <input type="file" id="file" name="file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt" />
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="submit-btn" style="margin-top:0.5rem">Submit request</button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>© <span id="year"></span> UniAssist · ASCES Department</p>
+    </div>
+  </footer>
+
+  <script src="../js/main.js?v=5"></script>
+  <script type="module">
+    import { supabase, requireAuth } from '../js/lib/supabase.js';
+    import { buildNavbar } from '../js/lib/ui.js';
+
+    async function init() {
+      const auth = await requireAuth('../auth/login.html');
+      if (!auth) return;
+      const { user, profile } = auth;
+
+      if (profile.role === 'admin') { window.location.href = '../admin/index.html'; return; }
+      document.getElementById('year').textContent = new Date().getFullYear();
+      buildNavbar({ role: 'student', name: profile.full_name, userId: user.id, active: 'new', basePath: '../' });
+
+      document.getElementById('request-form').addEventListener('submit', (e) => handleSubmit(e, user, profile));
+    }
+
+    async function handleSubmit(e, user, profile) {
+      e.preventDefault();
+      const form   = e.target;
+      const errEl  = document.getElementById('form-error');
+      const btn    = document.getElementById('submit-btn');
+      errEl.hidden = true;
+
+      const service     = form.service.value;
+      const title       = form.title.value.trim();
+      const description = form.description.value.trim();
+      const classYear   = form.class_year.value.trim();
+      const deadline    = form.deadline.value || null;
+      const fileInput   = form.file;
+
+      if (!service || !title || !description || !classYear) {
+        errEl.textContent = 'Please fill all required fields.';
+        errEl.hidden = false;
+        return;
+      }
+
+      btn.textContent = 'Submitting…';
+      btn.disabled    = true;
+
+      try {
+        // Upload file if provided
+        let fileUrl = null;
+        if (fileInput.files[0]) {
+          const file = fileInput.files[0];
+          const path = `${user.id}/${Date.now()}-${file.name}`;
+          const { data: uploadData, error: uploadErr } = await supabase.storage
+            .from('request-files')
+            .upload(path, file);
+          if (uploadErr) throw uploadErr;
+          const { data: { publicUrl } } = supabase.storage.from('request-files').getPublicUrl(path);
+          fileUrl = publicUrl;
+        }
+
+        // Insert request — auto-assignment Edge Function fires on insert
+        const { data: req, error } = await supabase
+          .from('requests')
+          .insert({
+            student_id:  user.id,
+            service,
+            title,
+            description,
+            class_year:  classYear,
+            deadline,
+            file_url:    fileUrl,
+            status:      'pending',
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        window.location.href = `request.html?id=${req.id}&new=1`;
+      } catch (err) {
+        errEl.textContent = err.message || 'Could not submit. Please try again.';
+        errEl.hidden = false;
+        btn.textContent = 'Submit request';
+        btn.disabled    = false;
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

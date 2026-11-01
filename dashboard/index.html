@@ -1,0 +1,180 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0c241c" />
+  <link rel="icon" type="image/jpeg" href="../img/umat.jpg" />
+  <link rel="apple-touch-icon" href="../img/umat.jpg" />
+  <title>My Requests — UniAssist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css?v=5" />
+</head>
+<body class="app-shell">
+
+  <!-- Top nav (populated by JS) -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="../index.html">
+        <img class="logo-img" src="../img/umat.jpg" alt="UMAT logo" />
+        UniAssist
+      </a>
+      <ul class="top-nav" role="list"></ul>
+      <button class="menu-toggle" type="button" aria-controls="nav-drawer" aria-expanded="false" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+  <nav class="nav-drawer" id="nav-drawer" aria-label="Main navigation"></nav>
+
+  <main class="app-main">
+    <div class="container">
+      <div class="page-hd">
+        <div>
+          <h1 id="greeting">My Requests</h1>
+          <p>Track everything you've sent to the team.</p>
+        </div>
+        <a href="new-request.html" class="btn btn-primary">+ New request</a>
+      </div>
+
+      <!-- Stats strip -->
+      <div class="stat-strip" id="stat-strip">
+        <div class="stat-tile"><b id="s-total">—</b><span>Total</span></div>
+        <div class="stat-tile"><b id="s-active">—</b><span>Active</span></div>
+        <div class="stat-tile"><b id="s-completed">—</b><span>Completed</span></div>
+        <div class="stat-tile"><b id="s-pending">—</b><span>Pending</span></div>
+      </div>
+
+      <!-- Filter bar -->
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem">
+        <button class="btn btn-ghost dark filter-btn is-active" data-filter="all" style="min-height:36px;padding:0.4rem 0.85rem;font-size:0.88rem">All</button>
+        <button class="btn btn-ghost dark filter-btn" data-filter="pending,assigned" style="min-height:36px;padding:0.4rem 0.85rem;font-size:0.88rem">Active</button>
+        <button class="btn btn-ghost dark filter-btn" data-filter="accepted,in_progress,review" style="min-height:36px;padding:0.4rem 0.85rem;font-size:0.88rem">In Progress</button>
+        <button class="btn btn-ghost dark filter-btn" data-filter="completed" style="min-height:36px;padding:0.4rem 0.85rem;font-size:0.88rem">Completed</button>
+        <button class="btn btn-ghost dark filter-btn" data-filter="declined" style="min-height:36px;padding:0.4rem 0.85rem;font-size:0.88rem">Declined</button>
+      </div>
+
+      <!-- Request list -->
+      <div id="req-list" class="req-list">
+        <p style="color:var(--muted)">Loading…</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>© <span id="year"></span> UniAssist · ASCES Department</p>
+      <p><a href="mailto:uniassist@gmail.com">uniassist@gmail.com</a></p>
+    </div>
+  </footer>
+
+  <script src="../js/main.js?v=5"></script>
+  <script type="module">
+    import { supabase, requireAuth } from '../js/lib/supabase.js';
+    import { badge, timeAgo, buildNavbar, escHtml } from '../js/lib/ui.js';
+
+    let allRequests = [];
+    let currentFilter = 'all';
+
+    async function init() {
+      const auth = await requireAuth('../auth/login.html');
+      if (!auth) return;
+      const { user, profile } = auth;
+
+      // Redirect admins to their own dashboard
+      if (profile.role === 'admin') { window.location.href = '../admin/index.html'; return; }
+
+      document.getElementById('greeting').textContent = `Hey, ${profile.full_name.split(' ')[0]}`;
+      document.getElementById('year').textContent = new Date().getFullYear();
+
+      buildNavbar({ role: 'student', name: profile.full_name, userId: user.id, active: 'dashboard', basePath: '../' });
+
+      await loadRequests(user.id);
+      setupFilters();
+      subscribeRealtime(user.id);
+    }
+
+    async function loadRequests(userId) {
+      const { data, error } = await supabase
+        .from('requests')
+        .select(`
+          id, service, title, status, created_at, deadline,
+          assigned_to ( full_name )
+        `)
+        .eq('student_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) { console.error(error); return; }
+      allRequests = data ?? [];
+      updateStats();
+      renderList();
+    }
+
+    function updateStats() {
+      const active    = allRequests.filter(r => ['pending','assigned','accepted'].includes(r.status)).length;
+      const inProg    = allRequests.filter(r => ['in_progress','review'].includes(r.status)).length;
+      const completed = allRequests.filter(r => r.status === 'completed').length;
+      const pending   = allRequests.filter(r => r.status === 'pending').length;
+
+      document.getElementById('s-total').textContent     = allRequests.length;
+      document.getElementById('s-active').textContent    = active + inProg;
+      document.getElementById('s-completed').textContent = completed;
+      document.getElementById('s-pending').textContent   = pending;
+    }
+
+    function renderList() {
+      const filtered = currentFilter === 'all'
+        ? allRequests
+        : allRequests.filter(r => currentFilter.split(',').includes(r.status));
+
+      const list = document.getElementById('req-list');
+      if (filtered.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6M9 16h6M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/></svg>
+            <p>${currentFilter === 'all' ? 'No requests yet. <a href="new-request.html">Make your first one →</a>' : 'Nothing in this category.'}</p>
+          </div>`;
+        return;
+      }
+
+      list.innerHTML = filtered.map(r => `
+        <a class="req-card" href="request.html?id=${r.id}">
+          <div class="req-card-top">
+            <h3>${escHtml(r.title)}</h3>
+            ${badge(r.status)}
+          </div>
+          <div class="req-card-meta">
+            <span>${escHtml(r.service)}</span>
+            ${r.assigned_to ? `<span>Assigned to ${escHtml(r.assigned_to.full_name)}</span>` : ''}
+            ${r.deadline ? `<span>Due ${escHtml(r.deadline)}</span>` : ''}
+            <span>${timeAgo(r.created_at)}</span>
+          </div>
+        </a>`).join('');
+    }
+
+    function setupFilters() {
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('is-active'));
+          btn.classList.add('is-active');
+          currentFilter = btn.dataset.filter;
+          renderList();
+        });
+      });
+    }
+
+    function subscribeRealtime(userId) {
+      supabase.channel('student-requests-' + userId)
+        .on('postgres_changes', {
+          event: '*', schema: 'public', table: 'requests',
+          filter: `student_id=eq.${userId}`,
+        }, () => loadRequests(userId))
+        .subscribe();
+    }
+
+    init();
+  </script>
+</body>
+</html>

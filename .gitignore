@@ -1,0 +1,23 @@
+# SQLite database
+data/uniassist.sqlite
+data/*.sqlite
+
+# PHP session files
+/tmp/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.suo
+*.user
+
+# Logs
+*.log
+
+# Environment / secrets (never commit these)
+.env
+.env.local
+.env.*.local

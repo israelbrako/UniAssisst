@@ -1,0 +1,148 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0c241c" />
+  <link rel="icon" type="image/jpeg" href="../img/umat.jpg" />
+  <link rel="apple-touch-icon" href="../img/umat.jpg" />
+  <title>Team — UniAssist Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css?v=5" />
+</head>
+<body class="app-shell">
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="../index.html">
+        <img class="logo-img" src="../img/umat.jpg" alt="UMAT logo" />
+        Staff
+      </a>
+      <ul class="top-nav" role="list"></ul>
+      <button class="menu-toggle" type="button" aria-controls="nav-drawer" aria-expanded="false" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+  <nav class="nav-drawer" id="nav-drawer"></nav>
+
+  <main class="app-main">
+    <div class="container" style="max-width:700px">
+      <div class="page-hd">
+        <div>
+          <h1>Team</h1>
+          <p>Current load, availability, and quick stats for each admin.</p>
+        </div>
+      </div>
+
+      <div class="team-grid" id="team-grid">
+        <p style="color:var(--muted)">Loading…</p>
+      </div>
+
+      <!-- My availability toggle -->
+      <div class="panel" style="margin-top:1.5rem">
+        <div class="panel-hd"><h2>Your availability</h2></div>
+        <p style="color:var(--muted);margin:0 0 1rem;font-size:0.9rem">
+          Toggle this when you're at capacity. New requests won't auto-assign to you while you're set to Busy.
+        </p>
+        <label class="avail-toggle" id="avail-label">
+          <input type="checkbox" id="avail-toggle" />
+          <span class="avail-track"></span>
+          <span class="avail-label" id="avail-text">Available</span>
+        </label>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>© <span id="year"></span> UniAssist · ASCES Department</p>
+    </div>
+  </footer>
+
+  <script src="../js/main.js?v=5"></script>
+  <script type="module">
+    import { supabase, requireAdmin } from '../js/lib/supabase.js';
+    import { buildNavbar, escHtml } from '../js/lib/ui.js';
+
+    let currentAdmin = null;
+
+    async function init() {
+      const auth = await requireAdmin('login.html');
+      if (!auth) return;
+      currentAdmin = auth;
+      const { user, profile } = auth;
+
+      document.getElementById('year').textContent = new Date().getFullYear();
+      buildNavbar({ role: 'admin', name: profile.full_name, userId: user.id, active: 'team', basePath: '../' });
+
+      await loadTeam();
+      setupAvailabilityToggle(profile);
+
+      // Realtime updates to team load
+      supabase.channel('team-profiles')
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles' }, () => loadTeam())
+        .subscribe();
+    }
+
+    async function loadTeam() {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, availability, active_requests')
+        .eq('role', 'admin')
+        .order('full_name');
+
+      if (error) { console.error(error); return; }
+      const grid = document.getElementById('team-grid');
+
+      grid.innerHTML = (data ?? []).map(admin => {
+        const initials = admin.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+        const avail    = admin.availability ?? 'available';
+        return `
+          <div class="team-card">
+            <div class="team-avatar">${escHtml(initials)}</div>
+            <div class="team-info">
+              <h3>${escHtml(admin.full_name)}</h3>
+              <p>
+                <span class="dot-avail ${avail}"></span>
+                ${avail === 'available' ? 'Available' : 'Busy'}
+                · ${admin.active_requests ?? 0} active
+              </p>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function setupAvailabilityToggle(profile) {
+      const toggle  = document.getElementById('avail-toggle');
+      const text    = document.getElementById('avail-text');
+      const current = profile.availability ?? 'available';
+
+      toggle.checked = current === 'available';
+      text.textContent = current === 'available' ? 'Available' : 'Busy';
+
+      toggle.addEventListener('change', async () => {
+        const newVal = toggle.checked ? 'available' : 'busy';
+        text.textContent = newVal === 'available' ? 'Available' : 'Busy';
+
+        const { error } = await supabase
+          .from('profiles')
+          .update({ availability: newVal })
+          .eq('id', currentAdmin.user.id);
+
+        if (error) {
+          alert('Could not update availability. Try again.');
+          toggle.checked = !toggle.checked;
+          text.textContent = toggle.checked ? 'Available' : 'Busy';
+        } else {
+          await loadTeam();
+        }
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>

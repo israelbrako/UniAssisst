@@ -1,0 +1,120 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0c241c" />
+  <link rel="icon" type="image/jpeg" href="../img/umat.jpg" />
+  <link rel="apple-touch-icon" href="../img/umat.jpg" />
+  <title>Create account — UniAssist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css?v=5" />
+</head>
+<body class="auth-page">
+  <div class="auth-box">
+    <a class="logo" href="../index.html">
+      <img class="logo-img" src="../img/umat.jpg" alt="UMAT logo" />
+      UniAssist
+    </a>
+    <h1>Create an account</h1>
+    <p class="sub">Submit and track your requests, chat with your assigned tutor.</p>
+
+    <div id="form-error" class="form-error" hidden></div>
+    <div id="form-success" class="form-success" hidden></div>
+
+    <form id="signup-form" novalidate>
+      <div class="field">
+        <label for="full_name">Full name</label>
+        <input type="text" id="full_name" name="full_name" required placeholder="e.g. Kwame Asante" />
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required placeholder="you@example.com" />
+      </div>
+      <div class="field">
+        <label for="phone">
+          Phone number
+          <span style="font-weight:400;color:var(--muted)"> — for SMS updates</span>
+        </label>
+        <input type="tel" id="phone" name="phone" required
+          placeholder="e.g. 0241234567"
+          pattern="^(\+233|233|0)[0-9]{9}$"
+          title="Enter a valid Ghana phone number e.g. 0241234567" />
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required minlength="8" placeholder="At least 8 characters" />
+      </div>
+      <button type="submit" class="btn btn-primary" id="submit-btn" style="width:100%;margin-top:0.5rem">Create account</button>
+    </form>
+
+    <p class="form-footer">Already have an account? <a href="login.html">Sign in</a></p>
+  </div>
+
+  <script type="module">
+    import { supabase } from '../js/lib/supabase.js';
+
+    const form     = document.getElementById('signup-form');
+    const errEl    = document.getElementById('form-error');
+    const succEl   = document.getElementById('form-success');
+    const submitBtn = document.getElementById('submit-btn');
+
+    function showError(msg) {
+      errEl.textContent = msg;
+      errEl.hidden = false;
+      succEl.hidden = true;
+    }
+    function showSuccess(msg) {
+      succEl.textContent = msg;
+      succEl.hidden = false;
+      errEl.hidden = true;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errEl.hidden = true;
+      succEl.hidden = true;
+
+      const fullName = form.full_name.value.trim();
+      const email    = form.email.value.trim();
+      const phone    = form.phone.value.trim();
+      const password = form.password.value;
+
+      if (!fullName || !email || !phone || !password) return showError('Please fill all fields.');
+      if (password.length < 8) return showError('Password must be at least 8 characters.');
+
+      submitBtn.textContent = 'Creating…';
+      submitBtn.disabled = true;
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: fullName, role: 'student' },
+        },
+      });
+
+      submitBtn.textContent = 'Create account';
+      submitBtn.disabled = false;
+
+      if (error) return showError(error.message);
+
+      // Create the profile row
+      if (data.user) {
+        await supabase.from('profiles').insert({
+          id: data.user.id,
+          full_name: fullName,
+          email,
+          phone,
+          role: 'student',
+        });
+      }
+
+      showSuccess('Account created! Check your email to confirm, then sign in.');
+      form.reset();
+    });
+  </script>
+</body>
+</html>

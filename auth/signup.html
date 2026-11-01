@@ -23,6 +23,9 @@
 
     <div id="form-error" class="form-error" hidden></div>
     <div id="form-success" class="form-success" hidden></div>
+    <div id="spam-notice" hidden style="background:#fef9ec;border:1px solid #e8c84a;border-radius:8px;padding:0.75rem 0.9rem;font-size:0.88rem;color:#5a4200;margin-bottom:0.9rem;line-height:1.5;">
+      📬 <strong>Check your spam folder</strong> — confirmation emails from new senders sometimes land there. Mark it as "Not spam" to make sure you receive future emails from us.
+    </div>
 
     <form id="signup-form" novalidate>
       <div class="field">
@@ -112,7 +115,8 @@
         });
       }
 
-      showSuccess('Account created! Check your email to confirm, then sign in.');
+      showSuccess('Account created! Check your inbox to confirm your email — if you don\'t see it within a minute, check your spam or junk folder.');
+      document.getElementById('spam-notice').hidden = false;
       form.reset();
     });
   </script>

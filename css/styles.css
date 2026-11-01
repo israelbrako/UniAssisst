@@ -319,16 +319,24 @@ input, textarea, select {
   display: grid;
   place-items: center;
   padding: 1.5rem 1rem;
+  position: relative;
   background: var(--bg);
 }
+.auth-page::before {
+  content: "";
+  position: fixed; inset: 0; z-index: 0;
+  background: url("../img/20260727_135242.jpg") center / cover no-repeat;
+  opacity: 0.18;
+}
 .auth-box {
+  position: relative; z-index: 1;
   width: 100%;
   max-width: 420px;
-  background: var(--surface);
+  background: rgba(251,248,241,0.97);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 2rem 1.5rem;
-  box-shadow: var(--shadow-1);
+  box-shadow: var(--shadow-2);
 }
 .auth-box .logo { color: var(--forest); margin-bottom: 1.5rem; display: flex; }
 .auth-box h1 { margin: 0 0 0.25rem; font-size: 1.65rem; }
@@ -539,19 +547,25 @@ input, textarea, select {
 
 /* ── Webverse credit ─────────────────────────────────────────── */
 .webverse-credit {
-  display: inline-flex; align-items: center; gap: 0.5rem;
-  text-decoration: none; opacity: 0.85; transition: opacity .15s;
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  text-decoration: none; opacity: 0.9; transition: opacity .15s;
+  cursor: default;
 }
-.webverse-credit:hover { opacity: 1; }
 .webverse-credit span {
-  font-size: 0.72rem; color: rgba(247,241,228,.6);
+  font-size: 0.9rem; color: rgba(247,241,228,.75);
   letter-spacing: 0.03em; white-space: nowrap;
 }
 .webverse-credit-img-wrap {
-  background: #fff; border-radius: 5px;
-  padding: 3px 8px; display: inline-flex; align-items: center;
-  height: 22px;
+  background: #fff; border-radius: 6px;
+  padding: 5px 14px; display: inline-flex; align-items: center;
+  height: 34px;
 }
 .webverse-credit-img-wrap img {
-  height: 14px; width: auto; display: block;
+  height: 22px; width: auto; display: block;
+}
+.footer-credit-row {
+  display: flex; justify-content: center; align-items: center;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(247,241,228,.08);
+  margin-top: 0.75rem;
 }

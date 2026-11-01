@@ -123,10 +123,10 @@ function buildMessage(type: string, body: string, name: string): string {
 
   switch (type) {
     case 'accepted':
-      return `Hi ${firstName}, your UniAssist request has been ACCEPTED. Log in to chat with your assigned tutor: uniassisst-seven.vercel.app`;
+      return `Hi ${firstName}, your UniAssist request has been ACCEPTED. Log in to chat with your assigned tutor: uniassist-eight.vercel.app`;
 
     case 'declined':
-      return `Hi ${firstName}, your UniAssist request was declined. Log in to see the reason and submit a new one: uniassisst-seven.vercel.app`;
+      return `Hi ${firstName}, your UniAssist request was declined. Log in to see the reason and submit a new one: uniassist-eight.vercel.app`;
 
     case 'status_update':
       // Trim body to keep SMS short
@@ -134,11 +134,11 @@ function buildMessage(type: string, body: string, name: string): string {
       return `UniAssist update: ${trimmed} Log in for details.`;
 
     case 'new_message':
-      return `Hi ${firstName}, you have a new message on your UniAssist request. Log in to reply: uniassisst-seven.vercel.app`;
+      return `Hi ${firstName}, you have a new message on your UniAssist request. Log in to reply: uniassist-eight.vercel.app`;
 
     case 'new_request':
       // This goes to admins
-      return `UniAssist: A new request has been assigned to you. Log in to review it: uniassisst-seven.vercel.app/admin`;
+      return `UniAssist: A new request has been assigned to you. Log in to review it: uniassist-eight.vercel.app/admin`;
 
     default:
       return body.length > 140 ? body.slice(0, 137) + '...' : body;

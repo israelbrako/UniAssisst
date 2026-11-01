@@ -539,16 +539,19 @@ input, textarea, select {
 
 /* ── Webverse credit ─────────────────────────────────────────── */
 .webverse-credit {
-  display: flex; align-items: center; gap: 0.45rem;
-  opacity: 0.55; transition: opacity .15s;
-  text-decoration: none;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  text-decoration: none; opacity: 0.85; transition: opacity .15s;
 }
-.webverse-credit:hover { opacity: 0.9; }
-.webverse-credit img {
-  height: 16px; width: auto; display: block;
-  filter: brightness(0) invert(1);
-}
+.webverse-credit:hover { opacity: 1; }
 .webverse-credit span {
-  font-size: 0.72rem; color: rgba(247,241,228,.7);
+  font-size: 0.72rem; color: rgba(247,241,228,.6);
   letter-spacing: 0.03em; white-space: nowrap;
+}
+.webverse-credit-img-wrap {
+  background: #fff; border-radius: 5px;
+  padding: 3px 8px; display: inline-flex; align-items: center;
+  height: 22px;
+}
+.webverse-credit-img-wrap img {
+  height: 14px; width: auto; display: block;
 }

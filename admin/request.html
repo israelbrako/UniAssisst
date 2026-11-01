@@ -208,12 +208,17 @@
 
       await loadTimeline();
 
-      // Chat
+      // Chat — only show if this admin is assigned to this request
       const chatStatuses = ['accepted','in_progress','review','completed'];
-      if (chatStatuses.includes(req.status)) {
+      const isAssigned = req.assigned_to?.id === currentAdmin.user.id;
+
+      if (chatStatuses.includes(req.status) && isAssigned) {
         document.getElementById('chat-input-row').style.display = 'flex';
         await loadMessages();
         setupChat();
+      } else if (chatStatuses.includes(req.status) && !isAssigned) {
+        // Another admin's request — hide chat entirely
+        document.getElementById('chat-section').style.display = 'none';
       }
 
       if (window.innerWidth >= 800) {

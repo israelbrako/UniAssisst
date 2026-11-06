@@ -91,7 +91,7 @@
       const { user, profile } = auth;
 
       document.getElementById('year').textContent = new Date().getFullYear();
-      buildNavbar({ role: 'admin', name: profile.full_name, userId: user.id, active: 'team', basePath: '../' });
+      buildNavbar({ role: 'admin', name: profile.full_name, userId: user.id, active: 'team', basePath: '../', isSuperAdmin: profile.role === 'super_admin' });
 
       await loadTeam();
       setupAvailabilityToggle(profile);

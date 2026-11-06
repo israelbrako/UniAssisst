@@ -157,6 +157,13 @@ export function buildNavbar(opts = {}) {
     { key: 'team',     href: `${basePath}admin/team.html`,     label: 'Team' },
   ];
 
+  // Super admins get an extra link
+  const isSuperAdmin = opts.role === 'super_admin' ||
+    (typeof opts.isSuperAdmin !== 'undefined' && opts.isSuperAdmin);
+  if (isSuperAdmin) {
+    adminLinks.push({ key: 'super', href: `${basePath}admin/super.html`, label: '⚡ Super Admin' });
+  }
+
   const links = role === 'admin' ? adminLinks : studentLinks;
 
   const header = document.querySelector('.site-header');

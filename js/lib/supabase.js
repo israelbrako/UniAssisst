@@ -85,26 +85,18 @@ export async function requireAuth(loginPath = '../auth/login.html') {
   }
 }
 
-/**
- * Redirect non-admins away.
- * Returns { user, profile } if authenticated admin.
- */
+/** Redirect non-admins away. Returns { user, profile } if authenticated admin or super_admin. */
 export async function requireAdmin(loginPath = 'login.html') {
   const user = await getUser();
-  if (!user) {
-    window.location.href = loginPath;
-    return null;
-  }
+  if (!user) { window.location.href = loginPath; return null; }
   try {
     const profile = await getProfile(user.id);
-    if (profile.role !== 'admin') {
-      window.location.href = '/index.html';
-      return null;
+    if (!['admin','super_admin'].includes(profile.role)) {
+      window.location.href = '/index.html'; return null;
     }
     return { user, profile };
   } catch (err) {
     console.error('requireAdmin: could not load profile', err);
-    window.location.href = loginPath;
-    return null;
+    window.location.href = loginPath; return null;
   }
 }

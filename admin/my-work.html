@@ -83,7 +83,7 @@
 
       document.getElementById('year').textContent = new Date().getFullYear();
       document.getElementById('page-title').textContent = `My Work — ${profile.full_name.split(' ')[0]}`;
-      buildNavbar({ role: 'admin', name: profile.full_name, userId: user.id, active: 'my-work', basePath: '../' });
+      buildNavbar({ role: 'admin', name: profile.full_name, userId: user.id, active: 'my-work', basePath: '../', isSuperAdmin: profile.role === 'super_admin' });
 
       await loadWork(user.id);
 

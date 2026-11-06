@@ -106,7 +106,7 @@
         document.getElementById('greeting').textContent = `Good day, ${firstName}`;
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        buildNavbar({ role: 'admin', name: profile.full_name, userId: user.id, active: 'queue', basePath: '../' });
+        buildNavbar({ role: 'admin', name: profile.full_name, userId: user.id, active: 'queue', basePath: '../', isSuperAdmin: profile.role === 'super_admin' });
         document.getElementById('app-main').classList.add('ready');
 
         await loadQueue();

@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0c241c" />
+  <link rel="icon" type="image/jpeg" href="../img/umat.jpg" />
+  <link rel="apple-touch-icon" href="../img/umat.jpg" />
+  <title>Registered! — UniAssist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css?v=5" />
+  <style>
+    .reg-page {
+      min-height: 100dvh;
+      background: var(--bg);
+      position: relative;
+      display: grid;
+      place-items: center;
+      padding: 2rem 1rem;
+    }
+    .reg-page::before {
+      content: "";
+      position: fixed; inset: 0; z-index: 0;
+      background: url("../img/20260727_135242.jpg") center / cover no-repeat;
+      opacity: 0.08;
+    }
+    .success-card {
+      position: relative; z-index: 1;
+      background: rgba(251,248,241,0.98);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 2.5rem 1.75rem;
+      max-width: 520px;
+      width: 100%;
+      box-shadow: var(--shadow-2);
+      text-align: center;
+    }
+    .success-icon {
+      width: 72px; height: 72px;
+      background: var(--forest);
+      border-radius: 50%;
+      display: grid; place-items: center;
+      margin: 0 auto 1.5rem;
+      font-size: 2rem;
+    }
+    .success-card h1 {
+      margin: 0 0 0.5rem;
+      font-size: clamp(1.6rem, 5vw, 2.1rem);
+    }
+    .success-card p {
+      color: var(--muted);
+      margin: 0 0 1.5rem;
+      line-height: 1.65;
+    }
+    .sms-notice {
+      background: #f0faf4;
+      border: 1px solid #a8dbbe;
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      margin-bottom: 1.75rem;
+      font-size: 0.9rem;
+      color: #0e3320;
+      text-align: left;
+    }
+    .sms-notice strong { display: block; margin-bottom: 0.25rem; }
+    .divider-text {
+      display: flex; align-items: center; gap: 0.75rem;
+      color: var(--muted); font-size: 0.82rem; margin-bottom: 1.25rem;
+    }
+    .divider-text::before, .divider-text::after {
+      content: ""; flex: 1; height: 1px; background: var(--line);
+    }
+    .action-btns {
+      display: grid; gap: 0.65rem;
+    }
+    .step-indicator {
+      display: flex; gap: 0.4rem; align-items: center;
+      justify-content: center; margin-bottom: 1.75rem;
+    }
+    .step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+    .step-dot.done { background: var(--forest); }
+    .step-dot.active { background: var(--gold); width: 24px; border-radius: 4px; }
+  </style>
+</head>
+<body class="reg-page">
+
+  <div class="success-card">
+
+    <div class="step-indicator">
+      <div class="step-dot done"></div>
+      <div class="step-dot active"></div>
+    </div>
+
+    <div class="success-icon">✓</div>
+
+    <h1 id="heading">You're in!</h1>
+    <p id="subtext">
+      Your registration is confirmed. We've sent you an SMS with the UniAssist link — check your phone.
+    </p>
+
+    <div class="sms-notice">
+      <strong>📱 Check your SMS</strong>
+      You should receive a text from <strong>Webverse</strong> shortly with a link to UniAssist.
+      If it doesn't arrive within a minute, your number may have been entered incorrectly —
+      <a href="index.html" style="color:var(--green)">go back and re-register</a>.
+    </div>
+
+    <div class="divider-text">What you can do now</div>
+
+    <div class="action-btns">
+      <a href="../index.html" class="btn btn-primary">
+        Visit UniAssist →
+      </a>
+      <a href="../auth/signup.html" class="btn btn-ghost dark">
+        Create your account
+      </a>
+      <a href="index.html" class="btn btn-ghost dark" style="font-size:0.88rem">
+        Register another person
+      </a>
+    </div>
+
+    <p style="margin-top:1.5rem;font-size:0.8rem;color:var(--muted)">
+      Built by
+      <span style="display:inline-block;background:#fff;border-radius:4px;padding:1px 8px;vertical-align:middle;border:1px solid var(--line)">
+        <img src="../img/webverse-logo-color.png" alt="WebVerse" style="height:13px;vertical-align:middle" />
+      </span>
+      for ASCES students
+    </p>
+
+  </div>
+
+  <script>
+    document.getElementById('year')?.textContent === new Date().getFullYear();
+    const name = new URLSearchParams(location.search).get('name');
+    if (name) {
+      document.getElementById('heading').textContent = `You're in, ${name}!`;
+      document.getElementById('subtext').textContent =
+        `Your registration is confirmed, ${name}. We've sent you an SMS with the UniAssist link — check your phone.`;
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0c241c" />
+  <link rel="icon" type="image/jpeg" href="../img/umat.jpg" />
+  <link rel="apple-touch-icon" href="../img/umat.jpg" />
+  <title>Register — UniAssist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css?v=5" />
+  <style>
+    .reg-page {
+      min-height: 100dvh;
+      background: var(--bg);
+      position: relative;
+    }
+    .reg-page::before {
+      content: "";
+      position: fixed; inset: 0; z-index: 0;
+      background: url("../img/20260727_135242.jpg") center / cover no-repeat;
+      opacity: 0.08;
+    }
+    .reg-header {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(12,36,28,0.97);
+      padding: 0.85rem 0;
+      backdrop-filter: blur(8px);
+    }
+    .reg-header .container {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .reg-body {
+      position: relative; z-index: 1;
+      padding: 2rem 1rem 4rem;
+    }
+    .reg-card {
+      background: rgba(251,248,241,0.98);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 2rem 1.5rem;
+      max-width: 560px;
+      margin: 0 auto;
+      box-shadow: var(--shadow-2);
+    }
+    .reg-card h1 {
+      margin: 0 0 0.3rem;
+      font-size: clamp(1.5rem, 5vw, 2rem);
+    }
+    .reg-card .sub {
+      color: var(--muted); margin: 0 0 1.75rem; font-size: 0.95rem;
+    }
+    .step-indicator {
+      display: flex; gap: 0.4rem; align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .step-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--line);
+    }
+    .step-dot.active { background: var(--gold); width: 24px; border-radius: 4px; }
+    .step-dot.done { background: var(--forest); }
+    .divider {
+      border: none; border-top: 1px solid var(--line);
+      margin: 1.25rem 0;
+    }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    @media (max-width: 480px) { .two-col { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body class="reg-page">
+
+  <!-- Header -->
+  <header class="reg-header">
+    <div class="container">
+      <a class="logo" href="../index.html">
+        <img class="logo-img" src="../img/umat.jpg" alt="UMAT logo" />
+        UniAssist
+      </a>
+      <span style="color:rgba(247,241,228,.55);font-size:0.85rem">VM Installation Day · Registration</span>
+    </div>
+  </header>
+
+  <div class="reg-body">
+    <div class="reg-card">
+
+      <!-- Step indicator -->
+      <div class="step-indicator">
+        <div class="step-dot active"></div>
+        <div class="step-dot"></div>
+      </div>
+
+      <h1>Let's get you registered</h1>
+      <p class="sub">Fill in your details below. You'll receive an SMS once you submit confirming your registration and introducing you to UniAssist.</p>
+
+      <div id="form-error" class="form-error" hidden></div>
+
+      <form id="reg-form" novalidate>
+
+        <!-- Personal info -->
+        <div class="field">
+          <label for="full_name">Full name</label>
+          <input type="text" id="full_name" name="full_name" required
+            autocomplete="name"
+            placeholder="e.g. Kwame Asante" />
+        </div>
+
+        <div class="two-col">
+          <div class="field">
+            <label for="phone">Phone number</label>
+            <input type="tel" id="phone" name="phone" required
+              autocomplete="tel"
+              placeholder="e.g. 0241234567"
+              pattern="^(\+233|233|0)[0-9]{9}$"
+              title="Enter a valid Ghana phone number" />
+          </div>
+          <div class="field">
+            <label for="email">
+              Email <span style="font-weight:400;color:var(--muted)">(optional)</span>
+            </label>
+            <input type="email" id="email" name="email"
+              autocomplete="email"
+              placeholder="you@example.com" />
+          </div>
+        </div>
+
+        <hr class="divider" />
+
+        <!-- Academic info -->
+        <div class="two-col">
+          <div class="field">
+            <label for="program">Programme</label>
+            <select id="program" name="program" required>
+              <option value="">— Select —</option>
+              <option value="Cyber Security">Cyber Security</option>
+              <option value="Information Systems">Information Systems</option>
+              <option value="Computer Science and Engineering">Computer Science &amp; Engineering</option>
+              <option value="AI and Robotics Engineering">AI and Robotics Engineering</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="year">Year</label>
+            <select id="year" name="year" required>
+              <option value="">— Select —</option>
+              <option value="Year 1">Year 1</option>
+              <option value="Year 2">Year 2</option>
+              <option value="Year 3">Year 3</option>
+              <option value="Year 4">Year 4</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="submit-btn" style="width:100%;margin-top:1rem">
+          Register &amp; get notified →
+        </button>
+
+      </form>
+
+      <p style="margin-top:1rem;font-size:0.82rem;color:var(--muted);text-align:center">
+        By registering you agree to receive one SMS from Webverse about UniAssist.
+      </p>
+
+    </div>
+  </div>
+
+  <!-- WebVerse footer -->
+  <footer class="site-footer" style="position:relative;z-index:1">
+    <div class="container footer-inner">
+      <p>© <span id="year"></span> UniAssist · ASCES Department</p>
+    </div>
+    <div class="container footer-credit-row">
+      <div class="webverse-credit">
+        <span>Developed by</span>
+        <div class="webverse-credit-img-wrap">
+          <img src="../img/webverse-logo-color.png" alt="WebVerse" />
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    const supabase = createClient(
+      'https://chpcmswfxbljtznapvmz.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNocGNtc3dmeGJsanR6bmFwdm16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0ODAxMzAsImV4cCI6MjEwOTA1NjEzMH0.nHlurxI77FqfzlciXK1oh7zv2OgfGVnPlQJhOT2kYJU'
+    );
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    const form      = document.getElementById('reg-form');
+    const errEl     = document.getElementById('form-error');
+    const submitBtn = document.getElementById('submit-btn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errEl.hidden = true;
+
+      const fullName = form.full_name.value.trim();
+      const phone    = form.phone.value.trim();
+      const email    = form.email.value.trim() || null;
+      const program  = form.program.value;
+      const year     = form.year.value;
+
+      if (!fullName || !phone || !program || !year) {
+        errEl.textContent = 'Please fill all required fields.';
+        errEl.hidden = false;
+        return;
+      }
+
+      submitBtn.textContent = 'Registering…';
+      submitBtn.disabled    = true;
+
+      try {
+        // Save to Supabase
+        const { error } = await supabase
+          .from('registrations')
+          .insert({ full_name: fullName, phone, email, program, year });
+
+        if (error) throw error;
+
+        // Send SMS via mNotify
+        await sendSMS(phone, fullName);
+
+        // Redirect to success page
+        window.location.href = `success.html?name=${encodeURIComponent(fullName.split(' ')[0])}`;
+
+      } catch (err) {
+        errEl.textContent = err.message || 'Could not register. Please try again.';
+        errEl.hidden = false;
+        submitBtn.textContent = 'Register & get notified →';
+        submitBtn.disabled    = false;
+      }
+    });
+
+    async function sendSMS(phone, fullName) {
+      const firstName = fullName.split(' ')[0];
+
+      // Format phone number to local format
+      let formatted = phone.replace(/\D/g, '');
+      if (formatted.startsWith('233')) formatted = '0' + formatted.slice(3);
+      else if (formatted.length === 9) formatted = '0' + formatted;
+
+      const message =
+        `Hi ${firstName}! You're registered for the VM Installation. ` +
+        `We've built UniAssist — a platform to help you with assignments, projects & tutorials. ` +
+        `Check it out: https://uniassist-eight.vercel.app — From Webverse`;
+
+      // Call the mNotify API via a Supabase Edge Function to keep the API key safe
+      await fetch('https://chpcmswfxbljtznapvmz.supabase.co/functions/v1/send-sms', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNocGNtc3dmeGJsanR6bmFwdm16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0ODAxMzAsImV4cCI6MjEwOTA1NjEzMH0.nHlurxI77FqfzlciXK1oh7zv2OgfGVnPlQJhOT2kYJU',
+        },
+        body: JSON.stringify({ phone: formatted, message }),
+      });
+    }
+  </script>
+</body>
+</html>

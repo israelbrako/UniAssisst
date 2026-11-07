@@ -244,9 +244,9 @@
       else if (formatted.length === 9) formatted = '0' + formatted;
 
       const message =
-        `Hi ${firstName}! You're registered for the VM Installation. ` +
-        `We've built UniAssist — a platform to help you with assignments, projects & tutorials. ` +
-        `Check it out: https://uniassist-eight.vercel.app — From Webverse`;
+        `Hi ${firstName}! We promised you a central platform - UniAssist is here. ` +
+        `Get help with assignments, projects & tutorials from the Webverse team. ` +
+        `Visit: https://uniassist-eight.vercel.app - Webverse`;
 
       // Call the mNotify API via a Supabase Edge Function to keep the API key safe
       await fetch('https://chpcmswfxbljtznapvmz.supabase.co/functions/v1/send-sms', {

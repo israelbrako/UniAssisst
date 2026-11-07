@@ -168,7 +168,7 @@
   <!-- WebVerse footer -->
   <footer class="site-footer" style="position:relative;z-index:1">
     <div class="container footer-inner">
-      <p>© <span id="year"></span> UniAssist · ASCES Department</p>
+      <p>© <span id="footer-year"></span> UniAssist · ASCES Department</p>
     </div>
     <div class="container footer-credit-row">
       <div class="webverse-credit">
@@ -188,7 +188,7 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNocGNtc3dmeGJsanR6bmFwdm16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0ODAxMzAsImV4cCI6MjEwOTA1NjEzMH0.nHlurxI77FqfzlciXK1oh7zv2OgfGVnPlQJhOT2kYJU'
     );
 
-    document.getElementById('year').textContent = new Date().getFullYear();
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
 
     const form      = document.getElementById('reg-form');
     const errEl     = document.getElementById('form-error');

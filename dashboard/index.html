@@ -91,7 +91,7 @@
         if (!auth) return;
         const { user, profile } = auth;
 
-        if (profile.role === 'admin') { window.location.href = '../admin/index.html'; return; }
+        if (['admin','super_admin'].includes(profile.role)) { window.location.href = '../admin/index.html'; return; }
 
         // Set greeting immediately so there's no flash
         const firstName = profile.full_name?.split(' ')[0] ?? 'there';

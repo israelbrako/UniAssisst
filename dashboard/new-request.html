@@ -131,7 +131,7 @@
       if (!auth) return;
       const { user, profile } = auth;
 
-      if (profile.role === 'admin') { window.location.href = '../admin/index.html'; return; }
+      if (['admin','super_admin'].includes(profile.role)) { window.location.href = '../admin/index.html'; return; }
       document.getElementById('year').textContent = new Date().getFullYear();
       buildNavbar({ role: 'student', name: profile.full_name, userId: user.id, active: 'new', basePath: '../' });
 

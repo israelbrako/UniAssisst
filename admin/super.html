@@ -238,7 +238,7 @@
               ${currentTab === 'admins'
                 ? '<th>Role</th><th>Active Jobs</th><th>Availability</th><th>Joined</th>'
                 : currentTab === 'students'
-                ? '<th>Joined</th>'
+                ? '<th>Joined</th><th></th>'
                 : '<th>Programme</th><th>Year</th><th>Registered</th>'}
             </tr>
           </thead>
@@ -271,7 +271,12 @@
                   <td style="white-space:nowrap;font-size:0.82rem">${timeAgo(u.created_at)}</td>
                 ` : currentTab === 'students' ? `
                   <td style="white-space:nowrap;font-size:0.82rem">${timeAgo(u.created_at)}</td>
-                ` : `
+                  <td>
+                    <button class="delete-btn" data-id="${u.id}" data-name="${escHtml(u.full_name ?? '')}"
+                      style="background:none;border:1px solid #e0aea8;color:#c0392b;padding:0.2rem 0.65rem;border-radius:6px;font:inherit;font-size:0.78rem;cursor:pointer;white-space:nowrap;">
+                      Remove
+                    </button>
+                  </td> : `
                   <td>${escHtml(u.program ?? '—')}</td>
                   <td>${escHtml(u.year ?? '—')}</td>
                   <td style="white-space:nowrap;font-size:0.82rem">${timeAgo(u.created_at)}</td>
@@ -287,6 +292,27 @@
           if (cb.checked) selected.add(phone);
           else selected.delete(phone);
           updateSelectedCount();
+        });
+      });
+
+      // Wire delete buttons
+      wrap.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const name = btn.dataset.name;
+          const id   = btn.dataset.id;
+          if (!confirm(`Remove "${name}" from the system?\n\nThis deletes their account and all their requests. This cannot be undone.`)) return;
+
+          btn.textContent = 'Removing…';
+          btn.disabled = true;
+
+          // Delete from auth (cascades to profiles via FK)
+          const { error } = await supabase.rpc('delete_user', { user_id: id });
+          if (error) {
+            // Fallback: just delete profile row (auth user stays but can't log in without profile)
+            await supabase.from('profiles').delete().eq('id', id);
+          }
+
+          await loadAll();
         });
       });
 

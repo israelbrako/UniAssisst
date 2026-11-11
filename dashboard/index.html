@@ -35,12 +35,12 @@
 
   <main class="app-main" id="app-main">
     <div class="container">
-      <div class="page-hd">
-        <div>
-          <h1 id="greeting"></h1>
-          <p id="greeting-sub">Welcome back.</p>
+      <div class="greeting-banner">
+        <h1 id="greeting"></h1>
+        <p id="greeting-sub">Welcome back.</p>
+        <div class="banner-actions">
+          <a href="new-request.html" class="btn btn-primary">+ New request</a>
         </div>
-        <a href="new-request.html" class="btn btn-primary">+ New request</a>
       </div>
 
       <div class="stat-strip">
@@ -50,12 +50,12 @@
         <div class="stat-tile"><b id="s-pending">0</b><span>Pending</span></div>
       </div>
 
-      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem">
-        <button class="btn btn-ghost dark filter-btn is-active" data-filter="all" style="min-height:36px;padding:0.4rem 0.85rem;font-size:0.88rem">All</button>
-        <button class="btn btn-ghost dark filter-btn" data-filter="pending,assigned" style="min-height:36px;padding:0.4rem 0.85rem;font-size:0.88rem">Active</button>
-        <button class="btn btn-ghost dark filter-btn" data-filter="accepted,in_progress,review" style="min-height:36px;padding:0.4rem 0.85rem;font-size:0.88rem">In Progress</button>
-        <button class="btn btn-ghost dark filter-btn" data-filter="completed" style="min-height:36px;padding:0.4rem 0.85rem;font-size:0.88rem">Completed</button>
-        <button class="btn btn-ghost dark filter-btn" data-filter="declined" style="min-height:36px;padding:0.4rem 0.85rem;font-size:0.88rem">Declined</button>
+      <div class="filter-bar">
+        <button class="filter-btn is-active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="pending,assigned">Active</button>
+        <button class="filter-btn" data-filter="accepted,in_progress,review">In Progress</button>
+        <button class="filter-btn" data-filter="completed">Completed</button>
+        <button class="filter-btn" data-filter="declined">Declined</button>
       </div>
 
       <div id="req-list" class="req-list"></div>

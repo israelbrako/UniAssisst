@@ -74,16 +74,17 @@
           <div class="content-panel-hd">
             <h2>Requests</h2>
             <select id="filter-status" style="min-height:30px;padding:0.2rem 0.6rem;border:1px solid var(--line);border-radius:6px;font:inherit;font-size:0.82rem">
-              <option value="">All statuses</option>
+              <option value="">All active</option>
               <option value="pending">Pending</option>
               <option value="assigned">Assigned</option>
               <option value="accepted">Accepted</option>
               <option value="in_progress">In Progress</option>
               <option value="review">Review</option>
+              <option value="completed">Completed</option>
             </select>
           </div>
-          <div class="content-panel-body" style="padding:0;overflow-x:auto">
-            <div id="queue-wrap" style="padding:1.25rem 1.4rem"></div>
+          <div class="content-panel-body" style="padding:0;overflow-x:auto;-webkit-overflow-scrolling:touch">
+            <div id="queue-wrap" style="padding:1.25rem 1.4rem;min-width:0"></div>
           </div>
         </div>
 
@@ -159,8 +160,7 @@
           student:student_id ( full_name, email ),
           assigned_to ( full_name )
         `)
-        .not('status', 'in', '("completed","declined")')
-        .order('created_at', { ascending: true });
+        .order('created_at', { ascending: false });
 
       if (error) {
         wrap.innerHTML = `<div class="form-error">Could not load queue. Please refresh.</div>`;
@@ -182,7 +182,10 @@
 
     function renderTable() {
       const filterVal = document.getElementById('filter-status').value;
-      const rows      = filterVal ? allRequests.filter(r => r.status === filterVal) : allRequests;
+      // By default hide completed and declined — show all when a specific status is selected
+      const rows = filterVal
+        ? allRequests.filter(r => r.status === filterVal)
+        : allRequests.filter(r => !['completed','declined'].includes(r.status));
       const wrap      = document.getElementById('queue-wrap');
 
       if (rows.length === 0) {

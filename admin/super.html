@@ -70,7 +70,8 @@
 
       <!-- Tab bar -->
       <div class="tab-bar">
-        <button class="tab-btn active" data-tab="app-users">App Users</button>
+        <button class="tab-btn active" data-tab="students">Students</button>
+        <button class="tab-btn" data-tab="admins">Admins</button>
         <button class="tab-btn" data-tab="vm-registrations">VM Day Registrations</button>
       </div>
 
@@ -125,7 +126,7 @@
     import { buildNavbar, timeAgo, escHtml } from '../js/lib/ui.js';
     import { startSessionTimer } from '../js/lib/session.js';
 
-    let currentTab   = 'app-users';
+    let currentTab   = 'students';
     let allAppUsers  = [];
     let allVMUsers   = [];
     let selected     = new Set();
@@ -195,9 +196,16 @@
     }
 
     function renderTable(filter = '') {
-      const isApp  = currentTab === 'app-users';
-      const source = isApp ? allAppUsers : allVMUsers;
-      const f      = filter.toLowerCase();
+      const f = filter.toLowerCase();
+
+      let source = [];
+      if (currentTab === 'students') {
+        source = allAppUsers.filter(u => u.role === 'student');
+      } else if (currentTab === 'admins') {
+        source = allAppUsers.filter(u => ['admin','super_admin'].includes(u.role));
+      } else {
+        source = allVMUsers;
+      }
 
       const rows = f
         ? source.filter(u =>
@@ -205,8 +213,12 @@
             (u.email ?? '').toLowerCase().includes(f))
         : source;
 
+      const isVM = currentTab === 'vm-registrations';
+
       document.getElementById('table-title').textContent =
-        isApp ? `App Users (${rows.length})` : `VM Day Registrations (${rows.length})`;
+        currentTab === 'students'   ? `Students (${rows.length})` :
+        currentTab === 'admins'     ? `Admins / Staff (${rows.length})` :
+        `VM Day Registrations (${rows.length})`;
 
       const wrap = document.getElementById('table-wrap');
 
@@ -223,8 +235,10 @@
               <th>Name</th>
               <th>Email</th>
               <th>Phone</th>
-              ${isApp
-                ? '<th>Role</th><th>Joined</th>'
+              ${currentTab === 'admins'
+                ? '<th>Role</th><th>Active Jobs</th><th>Availability</th><th>Joined</th>'
+                : currentTab === 'students'
+                ? '<th>Joined</th>'
                 : '<th>Programme</th><th>Year</th><th>Registered</th>'}
             </tr>
           </thead>
@@ -233,20 +247,35 @@
               <tr>
                 <td>
                   <div class="cb-wrap">
-                    <input type="checkbox" class="user-cb" data-phone="${escHtml(u.phone ?? '')}" data-name="${escHtml(u.full_name ?? '')}"
+                    <input type="checkbox" class="user-cb"
+                      data-phone="${escHtml(u.phone ?? '')}"
+                      data-name="${escHtml(u.full_name ?? '')}"
                       ${selected.has(u.phone) ? 'checked' : ''}
-                      ${u.phone ? '' : 'disabled title="No phone number"'} />
+                      ${u.phone ? '' : 'disabled title="No phone number on file"'} />
                   </div>
                 </td>
                 <td><strong>${escHtml(u.full_name ?? '—')}</strong></td>
-                <td>${escHtml(u.email ?? '—')}</td>
-                <td>${escHtml(u.phone ?? '—')}</td>
-                ${isApp
-                  ? `<td><span class="badge badge-${u.role === 'super_admin' ? 'accepted' : u.role === 'admin' ? 'assigned' : 'pending'}">${escHtml(u.role)}</span></td>
-                     <td style="white-space:nowrap">${timeAgo(u.created_at)}</td>`
-                  : `<td>${escHtml(u.program ?? '—')}</td>
-                     <td>${escHtml(u.year ?? '—')}</td>
-                     <td style="white-space:nowrap">${timeAgo(u.created_at)}</td>`}
+                <td style="font-size:0.85rem">${escHtml(u.email ?? '—')}</td>
+                <td>${u.phone ? escHtml(u.phone) : '<span style="color:var(--muted);font-size:0.8rem">No phone</span>'}</td>
+                ${currentTab === 'admins' ? `
+                  <td>
+                    <span class="badge ${u.role === 'super_admin' ? 'badge-accepted' : 'badge-assigned'}">
+                      ${escHtml(u.role === 'super_admin' ? 'Super Admin' : 'Admin')}
+                    </span>
+                  </td>
+                  <td style="text-align:center">${u.active_requests ?? 0}</td>
+                  <td>
+                    <span class="dot-avail ${u.availability ?? 'available'}"></span>
+                    ${u.availability === 'busy' ? 'Busy' : 'Available'}
+                  </td>
+                  <td style="white-space:nowrap;font-size:0.82rem">${timeAgo(u.created_at)}</td>
+                ` : currentTab === 'students' ? `
+                  <td style="white-space:nowrap;font-size:0.82rem">${timeAgo(u.created_at)}</td>
+                ` : `
+                  <td>${escHtml(u.program ?? '—')}</td>
+                  <td>${escHtml(u.year ?? '—')}</td>
+                  <td style="white-space:nowrap;font-size:0.82rem">${timeAgo(u.created_at)}</td>
+                `}
               </tr>`).join('')}
           </tbody>
         </table>`;
@@ -289,7 +318,10 @@
 
     function setupSMS() {
       document.getElementById('select-all-btn').addEventListener('click', () => {
-        const source = currentTab === 'app-users' ? allAppUsers : allVMUsers;
+        let source = [];
+        if (currentTab === 'students') source = allAppUsers.filter(u => u.role === 'student');
+        else if (currentTab === 'admins') source = allAppUsers.filter(u => ['admin','super_admin'].includes(u.role));
+        else source = allVMUsers;
         source.forEach(u => { if (u.phone) selected.add(u.phone); });
         renderTable(document.getElementById('search-input').value);
       });

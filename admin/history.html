@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#1a1f2e" />
+  <meta name="theme-color" content="#0c241c" />
   <link rel="icon" type="image/jpeg" href="../img/umat.jpg" />
   <link rel="apple-touch-icon" href="../img/umat.jpg" />
   <title>History — UniAssist Admin</title>
@@ -11,76 +11,55 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/styles.css?v=5" />
+  <link rel="stylesheet" href="../css/app.css?v=1" />
   <style>
-    .site-header { background: rgba(15,20,35,0.97); }
-    .nav-drawer  { background: #0f1423; }
-    .admin-badge { display:inline-block;background:#3b82f6;color:#fff;font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:0.15rem 0.5rem;border-radius:4px;vertical-align:middle;margin-left:0.4rem; }
+    .app-content { opacity: 0; transition: opacity .2s; }
+    .app-content.ready { opacity: 1; }
   </style>
 </head>
-<body class="app-shell">
+<body>
+  <div class="app-layout">
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <aside class="app-sidebar" id="app-sidebar"></aside>
 
-  <header class="site-header">
-    <div class="container header-inner">
-      <a class="logo" href="../index.html">
-        <img class="logo-img" src="../img/umat.jpg" alt="UMAT logo" />
-        UniAssist <span class="admin-badge">Staff</span>
-      </a>
-      <ul class="top-nav" role="list"></ul>
-      <button class="menu-toggle" type="button" aria-controls="nav-drawer" aria-expanded="false" aria-label="Open menu">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </header>
-  <nav class="nav-drawer" id="nav-drawer"></nav>
+    <div class="app-content" id="app-content">
+      <div class="app-topbar">
+        <button class="sidebar-toggle" id="sidebar-toggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <a class="logo" href="../index.html"><img class="logo-img" src="../img/umat.jpg" alt="UMAT" /> UniAssist</a>
+      </div>
 
-  <main class="app-main">
-    <div class="container">
-      <div class="page-hd">
-        <div>
+      <div class="app-content-inner">
+        <div class="app-page-hd">
           <h1>History</h1>
           <p>All completed and declined requests.</p>
         </div>
-      </div>
 
-      <!-- Search / filter row -->
-      <div style="display:flex;gap:0.65rem;flex-wrap:wrap;margin-bottom:1.2rem;align-items:center">
-        <input type="search" id="search-input" placeholder="Search by student or title…"
-          style="flex:1;min-width:200px;min-height:38px;padding:0.4rem 0.8rem;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:0.9rem" />
-        <select id="filter-status" style="min-height:38px;padding:0.3rem 0.7rem;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:0.88rem">
-          <option value="">All</option>
-          <option value="completed">Completed</option>
-          <option value="declined">Declined</option>
-        </select>
-      </div>
+        <div style="display:flex;gap:0.65rem;flex-wrap:wrap;margin-bottom:1.1rem;align-items:center">
+          <input type="search" id="search-input" placeholder="Search by student or title…"
+            style="flex:1;min-width:200px;min-height:38px;padding:0.4rem 0.8rem;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:0.9rem" />
+          <select id="filter-status" style="min-height:38px;padding:0.3rem 0.7rem;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:0.88rem">
+            <option value="">All</option>
+            <option value="completed">Completed</option>
+            <option value="declined">Declined</option>
+          </select>
+        </div>
 
-      <div class="panel" style="overflow-x:auto">
-        <div id="history-wrap">
-          <p style="color:var(--muted)">Loading…</p>
+        <div class="content-panel" style="overflow-x:auto">
+          <div id="history-wrap" style="padding:0.5rem 0"></div>
         </div>
       </div>
-    </div>
-  </main>
 
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <p>© <span id="year"></span> UniAssist · ASCES Department</p>
+      <footer class="site-footer">
+        <div class="container footer-inner"><p>© <span id="year"></span> UniAssist · ASCES Department</p></div>
+        <div class="container footer-credit-row"><div class="webverse-credit"><span>Developed by</span><div class="webverse-credit-img-wrap"><img src="../img/webverse-logo-color.png" alt="WebVerse" /></div></div></div>
+      </footer>
     </div>
-    <div class="container" style="padding-top:0.6rem;border-top:1px solid rgba(247,241,228,.08);margin-top:0.6rem">
-    <div class="container footer-credit-row">
-      <div class="webverse-credit">
-        <span>Developed by</span>
-        <div class="webverse-credit-img-wrap">
-          <img src="../img/webverse-logo-color.png" alt="WebVerse" />
-        </div>
-      </div>
-    </div>
-    </div>
-  </footer>
+  </div>
 
   <script src="../js/main.js?v=5"></script>
   <script type="module">
     import { supabase, requireAdmin } from '../js/lib/supabase.js';
-    import { badge, timeAgo, fmtDate, buildNavbar, escHtml } from '../js/lib/ui.js';
+    import { badge, timeAgo, fmtDate, escHtml, buildSidebar } from '../js/lib/ui.js';
     import { startSessionTimer } from '../js/lib/session.js';
 
     let allRows = [];
@@ -91,11 +70,13 @@
       const { user, profile } = auth;
 
       document.getElementById('year').textContent = new Date().getFullYear();
-      buildNavbar({ role: 'admin', name: profile.full_name, userId: user.id, active: 'history', basePath: '../', isSuperAdmin: profile.role === 'super_admin' });
+      buildSidebar({ role: profile.role, profile, active: 'history', basePath: '../',
+        onSignout: async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; } });
+
       startSessionTimer('login.html');
+      document.getElementById('app-content').classList.add('ready');
 
       await loadHistory();
-
       document.getElementById('search-input').addEventListener('input', renderTable);
       document.getElementById('filter-status').addEventListener('change', renderTable);
     }
@@ -103,12 +84,8 @@
     async function loadHistory() {
       const { data, error } = await supabase
         .from('requests')
-        .select(`
-          id, service, title, status, created_at, updated_at,
-          student:student_id ( full_name, email ),
-          assigned_to ( full_name )
-        `)
-        .in('status', ['completed', 'declined'])
+        .select(`id, service, title, status, created_at, updated_at, student:student_id ( full_name, email ), assigned_to ( full_name )`)
+        .in('status', ['completed','declined'])
         .order('updated_at', { ascending: false });
 
       if (error) { console.error(error); return; }
@@ -119,11 +96,9 @@
     function renderTable() {
       const search = document.getElementById('search-input').value.toLowerCase();
       const filter = document.getElementById('filter-status').value;
-
-      const rows = allRows.filter(r => {
+      const rows   = allRows.filter(r => {
         const matchStatus = !filter || r.status === filter;
-        const matchSearch = !search
-          || r.title.toLowerCase().includes(search)
+        const matchSearch = !search || r.title.toLowerCase().includes(search)
           || (r.student?.full_name ?? '').toLowerCase().includes(search)
           || (r.student?.email ?? '').toLowerCase().includes(search);
         return matchStatus && matchSearch;
@@ -131,37 +106,22 @@
 
       const wrap = document.getElementById('history-wrap');
       if (rows.length === 0) {
-        wrap.innerHTML = `<div class="empty-state"><p>No records found.</p></div>`;
+        wrap.innerHTML = `<div class="empty-state" style="padding:2rem"><p>No records found.</p></div>`;
         return;
       }
 
       wrap.innerHTML = `
         <table class="req-table">
-          <thead>
-            <tr>
-              <th>Student</th>
-              <th>Request</th>
-              <th>Handled by</th>
-              <th>Status</th>
-              <th>Closed</th>
-              <th></th>
-            </tr>
-          </thead>
+          <thead><tr><th>Student</th><th>Request</th><th>Handled by</th><th>Status</th><th>Closed</th><th></th></tr></thead>
           <tbody>
             ${rows.map(r => `
               <tr>
-                <td>
-                  <div class="name">${escHtml(r.student?.full_name ?? '—')}</div>
-                  <div class="sub">${escHtml(r.student?.email ?? '')}</div>
-                </td>
-                <td>
-                  <div class="name">${escHtml(r.title)}</div>
-                  <div class="sub">${escHtml(r.service)}</div>
-                </td>
+                <td><div class="name">${escHtml(r.student?.full_name ?? '—')}</div><div class="sub">${escHtml(r.student?.email ?? '')}</div></td>
+                <td><div class="name">${escHtml(r.title)}</div><div class="sub">${escHtml(r.service)}</div></td>
                 <td>${r.assigned_to ? escHtml(r.assigned_to.full_name) : '—'}</td>
                 <td>${badge(r.status)}</td>
                 <td style="white-space:nowrap">${timeAgo(r.updated_at)}</td>
-                <td><a href="request.html?id=${r.id}" style="font-weight:600">View →</a></td>
+                <td><a href="request.html?id=${r.id}" style="font-weight:600;color:var(--green)">View →</a></td>
               </tr>`).join('')}
           </tbody>
         </table>`;

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#1a1f2e" />
+  <meta name="theme-color" content="#0c241c" />
   <link rel="icon" type="image/jpeg" href="../img/umat.jpg" />
   <link rel="apple-touch-icon" href="../img/umat.jpg" />
   <title>Super Admin — UniAssist</title>
@@ -11,125 +11,99 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/styles.css?v=5" />
+  <link rel="stylesheet" href="../css/app.css?v=1" />
   <style>
-    .site-header { background: rgba(15,20,35,0.97); }
-    .nav-drawer  { background: #0f1423; }
-    .admin-badge { display:inline-block;background:#7c3aed;color:#fff;font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:0.15rem 0.5rem;border-radius:4px;vertical-align:middle;margin-left:0.4rem; }
-    .app-main { opacity:0; transition:opacity .2s; }
-    .app-main.ready { opacity:1; }
+    .app-content { opacity: 0; transition: opacity .2s; }
+    .app-content.ready { opacity: 1; }
     .users-table { width:100%; border-collapse:collapse; }
-    .users-table th { font-size:0.73rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--muted); text-align:left; padding:0.5rem 0.6rem; border-bottom:1px solid var(--line); }
-    .users-table td { padding:0.7rem 0.6rem; border-bottom:1px solid var(--line); font-size:0.9rem; vertical-align:middle; }
+    .users-table th { font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); text-align:left; padding:0.5rem 0.75rem; border-bottom:1px solid var(--line); font-weight:700; }
+    .users-table td { padding:0.75rem; border-bottom:1px solid var(--line); font-size:0.88rem; vertical-align:middle; }
     .users-table tr:last-child td { border-bottom:0; }
-    .users-table tr:hover td { background:var(--bg); }
-    .cb-wrap { display:flex; align-items:center; gap:0.5rem; }
+    .users-table tbody tr:hover td { background:rgba(12,36,28,.025); }
     .cb-wrap input[type=checkbox] { width:16px; height:16px; cursor:pointer; accent-color:var(--forest); }
-    .sms-panel { background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:1.25rem; margin-bottom:1.5rem; }
-    .sms-panel h2 { margin:0 0 0.75rem; font-size:1.1rem; }
-    .sms-panel textarea { width:100%; min-height:100px; padding:0.75rem; border:1px solid var(--line); border-radius:8px; font:inherit; font-size:14px; resize:vertical; }
-    .sms-actions { display:flex; gap:0.65rem; align-items:center; margin-top:0.75rem; flex-wrap:wrap; }
-    .sms-actions .count { color:var(--muted); font-size:0.88rem; }
-    .tab-bar { display:flex; gap:0.5rem; margin-bottom:1.25rem; flex-wrap:wrap; }
-    .tab-btn { padding:0.45rem 1rem; border-radius:8px; border:1px solid var(--line); background:var(--surface); font:inherit; font-size:0.88rem; cursor:pointer; transition:background .15s; }
-    .tab-btn.active { background:var(--forest); color:#f7f1e4; border-color:var(--forest); }
+    .tab-bar { display:flex; gap:0.4rem; margin-bottom:1.1rem; flex-wrap:wrap; background:var(--surface); padding:0.4rem; border-radius:10px; border:1px solid rgba(16,24,20,.08); }
+    .tab-btn { padding:0.4rem 0.9rem; border-radius:7px; border:none; background:transparent; font:inherit; font-size:0.85rem; font-weight:500; color:var(--muted); cursor:pointer; transition:all .15s; }
+    .tab-btn:hover { background:rgba(12,36,28,.05); color:var(--ink); }
+    .tab-btn.active { background:var(--forest); color:#f7f1e4; font-weight:600; }
   </style>
 </head>
-<body class="app-shell">
+<body>
+  <div class="app-layout">
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <aside class="app-sidebar" id="app-sidebar"></aside>
 
-  <header class="site-header">
-    <div class="container header-inner">
-      <a class="logo" href="../index.html">
-        <img class="logo-img" src="../img/umat.jpg" alt="UMAT logo" />
-        UniAssist <span class="admin-badge">Super Admin</span>
-      </a>
-      <ul class="top-nav" role="list"></ul>
-      <button class="menu-toggle" type="button" aria-controls="nav-drawer" aria-expanded="false" aria-label="Open menu">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </header>
-  <nav class="nav-drawer" id="nav-drawer"></nav>
+    <div class="app-content" id="app-content">
+      <div class="app-topbar">
+        <button class="sidebar-toggle" id="sidebar-toggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <a class="logo" href="../index.html"><img class="logo-img" src="../img/umat.jpg" alt="UMAT" /> UniAssist</a>
+      </div>
 
-  <main class="app-main" id="app-main">
-    <div class="container">
-
-      <div class="page-hd">
-        <div>
+      <div class="app-content-inner">
+        <div class="app-page-hd">
           <h1 id="greeting">Super Admin</h1>
           <p>Registered users and bulk SMS tools.</p>
         </div>
-      </div>
 
-      <!-- Stats strip -->
-      <div class="stat-strip">
-        <div class="stat-tile"><b id="s-students">0</b><span>Students (app)</span></div>
-        <div class="stat-tile"><b id="s-registered">0</b><span>VM Day registrations</span></div>
-        <div class="stat-tile"><b id="s-admins">0</b><span>Admins</span></div>
-        <div class="stat-tile"><b id="s-requests">0</b><span>Total requests</span></div>
-      </div>
-
-      <!-- Tab bar -->
-      <div class="tab-bar">
-        <button class="tab-btn active" data-tab="students">Students</button>
-        <button class="tab-btn" data-tab="admins">Admins</button>
-        <button class="tab-btn" data-tab="vm-registrations">VM Day Registrations</button>
-      </div>
-
-      <!-- SMS panel -->
-      <div class="sms-panel">
-        <h2>📱 Send bulk SMS</h2>
-        <p style="color:var(--muted);font-size:0.88rem;margin:0 0 0.75rem">
-          Select users below using the checkboxes, write your message, and send.
-        </p>
-        <textarea id="sms-text" placeholder="Type your message here… (e.g. Reminder: UniAssist is live at uniassist-eight.vercel.app)"></textarea>
-        <div class="sms-actions">
-          <button class="btn btn-primary" id="send-sms-btn" style="width:auto">Send SMS to selected</button>
-          <button class="btn btn-ghost dark" id="select-all-btn" style="width:auto;font-size:0.85rem">Select all</button>
-          <button class="btn btn-ghost dark" id="deselect-all-btn" style="width:auto;font-size:0.85rem">Deselect all</button>
-          <span class="count" id="selected-count">0 selected</span>
+        <div class="stat-grid">
+          <div class="stat-card-dark"><div class="sc-label">Students</div><span class="sc-value" id="s-students">0</span><span class="sc-sub">App users</span></div>
+          <div class="stat-card-dark"><div class="sc-label">VM Day</div><span class="sc-value" id="s-registered">0</span><span class="sc-sub">Registrations</span></div>
+          <div class="stat-card-dark"><div class="sc-label">Admins</div><span class="sc-value" id="s-admins">0</span><span class="sc-sub">Staff members</span></div>
+          <div class="stat-card-dark"><div class="sc-label">Requests</div><span class="sc-value" id="s-requests">0</span><span class="sc-sub">Total submitted</span></div>
         </div>
-        <div id="sms-status" style="margin-top:0.5rem;font-size:0.88rem;color:var(--muted)"></div>
-      </div>
 
-      <!-- Users table -->
-      <div class="panel" style="overflow-x:auto">
-        <div class="panel-hd">
-          <h2 id="table-title">App Users</h2>
-          <input type="search" id="search-input" placeholder="Search by name or email…"
-            style="min-height:34px;padding:0.3rem 0.75rem;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:0.85rem;width:200px" />
+        <!-- SMS Panel -->
+        <div class="content-panel" style="margin-bottom:1.1rem">
+          <div class="content-panel-hd"><h2>📱 Send bulk SMS</h2></div>
+          <div class="content-panel-body">
+            <p style="color:var(--muted);font-size:0.88rem;margin:0 0 0.75rem">Select users below, write your message, then send.</p>
+            <textarea id="sms-text" placeholder="Type your message here…" style="width:100%;min-height:90px;padding:0.75rem;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:14px;resize:vertical;"></textarea>
+            <div style="display:flex;gap:0.65rem;align-items:center;margin-top:0.75rem;flex-wrap:wrap;">
+              <button class="btn btn-primary" id="send-sms-btn" style="width:auto;min-height:38px;padding:0.4rem 1rem">Send to selected</button>
+              <button class="btn btn-ghost dark" id="select-all-btn" style="width:auto;min-height:38px;padding:0.4rem 0.9rem;font-size:0.85rem">Select all</button>
+              <button class="btn btn-ghost dark" id="deselect-all-btn" style="width:auto;min-height:38px;padding:0.4rem 0.9rem;font-size:0.85rem">Deselect all</button>
+              <span style="color:var(--muted);font-size:0.88rem" id="selected-count">0 selected</span>
+            </div>
+            <div id="sms-status" style="margin-top:0.5rem;font-size:0.88rem;color:var(--muted)"></div>
+          </div>
         </div>
-        <div id="table-wrap">
-          <p style="color:var(--muted)">Loading…</p>
+
+        <!-- Tabs -->
+        <div class="tab-bar">
+          <button class="tab-btn active" data-tab="students">Students</button>
+          <button class="tab-btn" data-tab="admins">Admins</button>
+          <button class="tab-btn" data-tab="vm-registrations">VM Day</button>
+        </div>
+
+        <!-- Users table panel -->
+        <div class="content-panel" style="overflow-x:auto">
+          <div class="content-panel-hd">
+            <h2 id="table-title">Students</h2>
+            <input type="search" id="search-input" placeholder="Search…"
+              style="min-height:30px;padding:0.3rem 0.75rem;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:0.82rem;width:180px" />
+          </div>
+          <div id="table-wrap" style="padding:0.5rem 0"></div>
         </div>
       </div>
 
+      <footer class="site-footer">
+        <div class="container footer-inner"><p>© <span id="year"></span> UniAssist · ASCES Department</p></div>
+        <div class="container footer-credit-row"><div class="webverse-credit"><span>Developed by</span><div class="webverse-credit-img-wrap"><img src="../img/webverse-logo-color.png" alt="WebVerse" /></div></div></div>
+      </footer>
     </div>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <p>© <span id="year"></span> UniAssist · ASCES Department</p>
-    </div>
-    <div class="container footer-credit-row">
-      <div class="webverse-credit">
-        <span>Developed by</span>
-        <div class="webverse-credit-img-wrap">
-          <img src="../img/webverse-logo-color.png" alt="WebVerse" />
-        </div>
-      </div>
-    </div>
-  </footer>
+  </div>
 
   <script src="../js/main.js?v=5"></script>
   <script type="module">
     import { supabase, requireAdmin } from '../js/lib/supabase.js';
-    import { buildNavbar, timeAgo, escHtml } from '../js/lib/ui.js';
+    import { buildSidebar, timeAgo, escHtml } from '../js/lib/ui.js';
     import { startSessionTimer } from '../js/lib/session.js';
 
-    let currentTab   = 'students';
-    let allAppUsers  = [];
-    let allVMUsers   = [];
-    let selected     = new Set();
+    const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNocGNtc3dmeGJsanR6bmFwdm16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0ODAxMzAsImV4cCI6MjEwOTA1NjEzMH0.nHlurxI77FqfzlciXK1oh7zv2OgfGVnPlQJhOT2kYJU';
+
+    let currentTab  = 'students';
+    let allAppUsers = [];
+    let allVMUsers  = [];
+    let selected    = new Set();
 
     async function init() {
       try {
@@ -137,19 +111,17 @@
         if (!auth) return;
         const { user, profile } = auth;
 
-        // Only super_admins can access this page
-        if (profile.role !== 'super_admin') {
-          window.location.href = 'index.html';
-          return;
-        }
+        if (profile.role !== 'super_admin') { window.location.href = 'index.html'; return; }
 
-        document.getElementById('greeting').textContent =
-          `Super Admin — ${profile.full_name.split(' ')[0]}`;
+        const firstName = profile.full_name?.split(' ')[0] ?? '';
+        document.getElementById('greeting').textContent = `Super Admin — ${firstName}`;
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        buildNavbar({ role: 'admin', name: profile.full_name, userId: user.id, active: 'queue', basePath: '../', isSuperAdmin: profile.role === 'super_admin' });
-        document.getElementById('app-main').classList.add('ready');
+        buildSidebar({ role: profile.role, profile, active: 'super', basePath: '../',
+          onSignout: async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; } });
+
         startSessionTimer('login.html');
+        document.getElementById('app-content').classList.add('ready');
 
         await loadAll();
         setupTabs();
@@ -163,32 +135,20 @@
     }
 
     async function loadAll() {
-      // Load app users (profiles)
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, full_name, email, phone, role, created_at')
+      const { data: profiles } = await supabase.from('profiles')
+        .select('id, full_name, email, phone, role, availability, active_requests, created_at')
         .order('created_at', { ascending: false });
-
       allAppUsers = profiles ?? [];
 
-      // Load VM day registrations
-      const { data: regs } = await supabase
-        .from('registrations')
+      const { data: regs } = await supabase.from('registrations')
         .select('id, full_name, email, phone, program, year, created_at')
         .order('created_at', { ascending: false });
-
       allVMUsers = regs ?? [];
 
-      // Load request count
-      const { count } = await supabase
-        .from('requests')
-        .select('id', { count: 'exact', head: true });
+      const { count } = await supabase.from('requests').select('id', { count: 'exact', head: true });
 
-      // Update stats
-      document.getElementById('s-students').textContent =
-        allAppUsers.filter(u => u.role === 'student').length;
-      document.getElementById('s-admins').textContent =
-        allAppUsers.filter(u => ['admin','super_admin'].includes(u.role)).length;
+      document.getElementById('s-students').textContent   = allAppUsers.filter(u => u.role === 'student').length;
+      document.getElementById('s-admins').textContent     = allAppUsers.filter(u => ['admin','super_admin'].includes(u.role)).length;
       document.getElementById('s-registered').textContent = allVMUsers.length;
       document.getElementById('s-requests').textContent   = count ?? 0;
 
@@ -197,121 +157,79 @@
 
     function renderTable(filter = '') {
       const f = filter.toLowerCase();
-
       let source = [];
-      if (currentTab === 'students') {
-        source = allAppUsers.filter(u => u.role === 'student');
-      } else if (currentTab === 'admins') {
-        source = allAppUsers.filter(u => ['admin','super_admin'].includes(u.role));
-      } else {
-        source = allVMUsers;
-      }
+      if (currentTab === 'students')         source = allAppUsers.filter(u => u.role === 'student');
+      else if (currentTab === 'admins')      source = allAppUsers.filter(u => ['admin','super_admin'].includes(u.role));
+      else                                   source = allVMUsers;
 
-      const rows = f
-        ? source.filter(u =>
-            (u.full_name ?? '').toLowerCase().includes(f) ||
-            (u.email ?? '').toLowerCase().includes(f))
-        : source;
-
-      const isVM = currentTab === 'vm-registrations';
+      const rows = f ? source.filter(u =>
+        (u.full_name ?? '').toLowerCase().includes(f) ||
+        (u.email ?? '').toLowerCase().includes(f)) : source;
 
       document.getElementById('table-title').textContent =
-        currentTab === 'students'   ? `Students (${rows.length})` :
-        currentTab === 'admins'     ? `Admins / Staff (${rows.length})` :
+        currentTab === 'students' ? `Students (${rows.length})` :
+        currentTab === 'admins'   ? `Admins / Staff (${rows.length})` :
         `VM Day Registrations (${rows.length})`;
 
       const wrap = document.getElementById('table-wrap');
-
       if (rows.length === 0) {
-        wrap.innerHTML = `<div class="empty-state"><p>No records found.</p></div>`;
+        wrap.innerHTML = `<div class="empty-state" style="padding:2rem"><p>No records found.</p></div>`;
         return;
       }
 
       wrap.innerHTML = `
         <table class="users-table">
-          <thead>
-            <tr>
-              <th style="width:36px"></th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              ${currentTab === 'admins'
-                ? '<th>Role</th><th>Active Jobs</th><th>Availability</th><th>Joined</th>'
-                : currentTab === 'students'
-                ? '<th>Joined</th><th></th>'
-                : '<th>Programme</th><th>Year</th><th>Registered</th>'}
-            </tr>
-          </thead>
+          <thead><tr>
+            <th style="width:36px"></th>
+            <th>Name</th><th>Email</th><th>Phone</th>
+            ${currentTab === 'admins'
+              ? '<th>Role</th><th>Active</th><th>Status</th><th>Joined</th>'
+              : currentTab === 'students'
+              ? '<th>Joined</th><th></th>'
+              : '<th>Programme</th><th>Year</th><th>Registered</th>'}
+          </tr></thead>
           <tbody>
             ${rows.map(u => `
               <tr>
-                <td>
-                  <div class="cb-wrap">
-                    <input type="checkbox" class="user-cb"
-                      data-phone="${escHtml(u.phone ?? '')}"
-                      data-name="${escHtml(u.full_name ?? '')}"
-                      ${selected.has(u.phone) ? 'checked' : ''}
-                      ${u.phone ? '' : 'disabled title="No phone number on file"'} />
-                  </div>
-                </td>
+                <td><input type="checkbox" class="user-cb"
+                  data-phone="${escHtml(u.phone ?? '')}" data-name="${escHtml(u.full_name ?? '')}"
+                  ${selected.has(u.phone) ? 'checked' : ''}
+                  ${u.phone ? '' : 'disabled title="No phone on file"'} /></td>
                 <td><strong>${escHtml(u.full_name ?? '—')}</strong></td>
-                <td style="font-size:0.85rem">${escHtml(u.email ?? '—')}</td>
-                <td>${u.phone ? escHtml(u.phone) : '<span style="color:var(--muted);font-size:0.8rem">No phone</span>'}</td>
+                <td style="font-size:0.82rem">${escHtml(u.email ?? '—')}</td>
+                <td>${u.phone ? escHtml(u.phone) : '<span style="color:var(--muted);font-size:0.78rem">No phone</span>'}</td>
                 ${currentTab === 'admins' ? `
-                  <td>
-                    <span class="badge ${u.role === 'super_admin' ? 'badge-accepted' : 'badge-assigned'}">
-                      ${escHtml(u.role === 'super_admin' ? 'Super Admin' : 'Admin')}
-                    </span>
-                  </td>
+                  <td><span class="badge ${u.role === 'super_admin' ? 'badge-accepted' : 'badge-assigned'}">${u.role === 'super_admin' ? 'Super Admin' : 'Admin'}</span></td>
                   <td style="text-align:center">${u.active_requests ?? 0}</td>
-                  <td>
-                    <span class="dot-avail ${u.availability ?? 'available'}"></span>
-                    ${u.availability === 'busy' ? 'Busy' : 'Available'}
-                  </td>
-                  <td style="white-space:nowrap;font-size:0.82rem">${timeAgo(u.created_at)}</td>
+                  <td><span class="dot-avail ${u.availability ?? 'available'}"></span> ${u.availability === 'busy' ? 'Busy' : 'Available'}</td>
+                  <td style="white-space:nowrap;font-size:0.8rem">${timeAgo(u.created_at)}</td>
                 ` : currentTab === 'students' ? `
-                  <td style="white-space:nowrap;font-size:0.82rem">${timeAgo(u.created_at)}</td>
-                  <td>
-                    <button class="delete-btn" data-id="${u.id}" data-name="${escHtml(u.full_name ?? '')}"
-                      style="background:none;border:1px solid #e0aea8;color:#c0392b;padding:0.2rem 0.65rem;border-radius:6px;font:inherit;font-size:0.78rem;cursor:pointer;white-space:nowrap;">
-                      Remove
-                    </button>
-                  </td> : `
+                  <td style="white-space:nowrap;font-size:0.8rem">${timeAgo(u.created_at)}</td>
+                  <td><button class="delete-btn" data-id="${u.id}" data-name="${escHtml(u.full_name ?? '')}"
+                    style="background:none;border:1px solid #e0aea8;color:#c0392b;padding:0.2rem 0.6rem;border-radius:6px;font:inherit;font-size:0.76rem;cursor:pointer;">Remove</button></td>
+                ` : `
                   <td>${escHtml(u.program ?? '—')}</td>
                   <td>${escHtml(u.year ?? '—')}</td>
-                  <td style="white-space:nowrap;font-size:0.82rem">${timeAgo(u.created_at)}</td>
+                  <td style="white-space:nowrap;font-size:0.8rem">${timeAgo(u.created_at)}</td>
                 `}
               </tr>`).join('')}
           </tbody>
         </table>`;
 
-      // Wire checkboxes
       wrap.querySelectorAll('.user-cb').forEach(cb => {
         cb.addEventListener('change', () => {
           const phone = cb.dataset.phone;
-          if (cb.checked) selected.add(phone);
-          else selected.delete(phone);
+          if (cb.checked) selected.add(phone); else selected.delete(phone);
           updateSelectedCount();
         });
       });
 
-      // Wire delete buttons
       wrap.querySelectorAll('.delete-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
-          const name = btn.dataset.name;
-          const id   = btn.dataset.id;
-          if (!confirm(`Remove "${name}" from the system?\n\nThis deletes their account and all their requests. This cannot be undone.`)) return;
-
-          btn.textContent = 'Removing…';
-          btn.disabled = true;
-
-          // Delete from auth (cascades to profiles via FK)
-          const { error } = await supabase.rpc('delete_user', { user_id: id });
-          if (error) {
-            // Fallback: just delete profile row (auth user stays but can't log in without profile)
-            await supabase.from('profiles').delete().eq('id', id);
-          }
-
+          if (!confirm(`Remove "${btn.dataset.name}"? This cannot be undone.`)) return;
+          btn.textContent = 'Removing…'; btn.disabled = true;
+          const { error } = await supabase.rpc('delete_user', { user_id: btn.dataset.id });
+          if (error) await supabase.from('profiles').delete().eq('id', btn.dataset.id);
           await loadAll();
         });
       });
@@ -320,8 +238,7 @@
     }
 
     function updateSelectedCount() {
-      document.getElementById('selected-count').textContent =
-        `${selected.size} selected`;
+      document.getElementById('selected-count').textContent = `${selected.size} selected`;
     }
 
     function setupTabs() {
@@ -337,17 +254,14 @@
     }
 
     function setupSearch() {
-      document.getElementById('search-input').addEventListener('input', (e) => {
-        renderTable(e.target.value);
-      });
+      document.getElementById('search-input').addEventListener('input', e => renderTable(e.target.value));
     }
 
     function setupSMS() {
       document.getElementById('select-all-btn').addEventListener('click', () => {
-        let source = [];
-        if (currentTab === 'students') source = allAppUsers.filter(u => u.role === 'student');
-        else if (currentTab === 'admins') source = allAppUsers.filter(u => ['admin','super_admin'].includes(u.role));
-        else source = allVMUsers;
+        let source = currentTab === 'students' ? allAppUsers.filter(u => u.role === 'student')
+          : currentTab === 'admins' ? allAppUsers.filter(u => ['admin','super_admin'].includes(u.role))
+          : allVMUsers;
         source.forEach(u => { if (u.phone) selected.add(u.phone); });
         renderTable(document.getElementById('search-input').value);
       });
@@ -361,56 +275,31 @@
     }
 
     async function sendBulkSMS() {
-      const message = document.getElementById('sms-text').value.trim();
+      const message  = document.getElementById('sms-text').value.trim();
       const statusEl = document.getElementById('sms-status');
-
-      if (!message) {
-        statusEl.textContent = 'Please write a message first.';
-        statusEl.style.color = '#c0392b';
-        return;
-      }
-      if (selected.size === 0) {
-        statusEl.textContent = 'Please select at least one recipient.';
-        statusEl.style.color = '#c0392b';
-        return;
-      }
-
-      const confirmed = confirm(
-        `Send this SMS to ${selected.size} recipient${selected.size > 1 ? 's' : ''}?\n\n"${message}"`
-      );
-      if (!confirmed) return;
+      if (!message) { statusEl.textContent = 'Please write a message first.'; statusEl.style.color = '#c0392b'; return; }
+      if (selected.size === 0) { statusEl.textContent = 'Please select at least one recipient.'; statusEl.style.color = '#c0392b'; return; }
+      if (!confirm(`Send this SMS to ${selected.size} recipient${selected.size > 1 ? 's' : ''}?\n\n"${message}"`)) return;
 
       const btn = document.getElementById('send-sms-btn');
-      btn.textContent = 'Sending…';
-      btn.disabled    = true;
+      btn.textContent = 'Sending…'; btn.disabled = true;
       statusEl.style.color = 'var(--muted)';
       statusEl.textContent = `Sending to ${selected.size} recipients…`;
 
-      let sent = 0;
-      let failed = 0;
+      let sent = 0, failed = 0;
       const phones = [...selected];
 
-      // Send in batches of 10
       for (let i = 0; i < phones.length; i += 10) {
         const batch = phones.slice(i, i + 10);
-        const res = await fetch(
-          'https://chpcmswfxbljtznapvmz.supabase.co/functions/v1/send-sms',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNocGNtc3dmeGJsanR6bmFwdm16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0ODAxMzAsImV4cCI6MjEwOTA1NjEzMH0.nHlurxI77FqfzlciXK1oh7zv2OgfGVnPlQJhOT2kYJU',
-            },
-            body: JSON.stringify({ phones: batch, message }),
-          }
-        ).catch(() => null);
-
-        if (res?.ok) sent += batch.length;
-        else failed += batch.length;
+        const res = await fetch('https://chpcmswfxbljtznapvmz.supabase.co/functions/v1/send-sms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ANON_KEY}` },
+          body: JSON.stringify({ phones: batch, message }),
+        }).catch(() => null);
+        if (res?.ok) sent += batch.length; else failed += batch.length;
       }
 
-      btn.textContent = 'Send SMS to selected';
-      btn.disabled    = false;
+      btn.textContent = 'Send to selected'; btn.disabled = false;
       statusEl.style.color = failed > 0 ? '#c0392b' : '#0e3320';
       statusEl.textContent = failed > 0
         ? `Sent: ${sent}, Failed: ${failed}`

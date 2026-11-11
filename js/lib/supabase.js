@@ -66,7 +66,8 @@ export async function getProfile(userId) {
 
 /**
  * Redirect to login if no active session.
- * Returns { user, profile } if authenticated.
+ * Also signs out if the logged-in user is an admin (wrong role for student pages).
+ * Returns { user, profile } if authenticated student.
  */
 export async function requireAuth(loginPath = '../auth/login.html') {
   const user = await getUser();
@@ -76,6 +77,12 @@ export async function requireAuth(loginPath = '../auth/login.html') {
   }
   try {
     const profile = await getProfile(user.id);
+    // If an admin is somehow on a student page, redirect them to admin
+    if (['admin','super_admin'].includes(profile.role)) {
+      window.location.href = loginPath.replace('../auth/login.html', '../admin/index.html')
+        .replace('/auth/login.html', '/admin/index.html');
+      return null;
+    }
     return { user, profile };
   } catch (err) {
     console.error('requireAuth: could not load profile', err);
@@ -85,18 +92,28 @@ export async function requireAuth(loginPath = '../auth/login.html') {
   }
 }
 
-/** Redirect non-admins away. Returns { user, profile } if authenticated admin or super_admin. */
+/**
+ * Redirect non-admins away. Returns { user, profile } if authenticated admin or super_admin.
+ * Also signs out if the logged-in user is a student (wrong role for admin pages).
+ */
 export async function requireAdmin(loginPath = 'login.html') {
   const user = await getUser();
-  if (!user) { window.location.href = loginPath; return null; }
+  if (!user) {
+    window.location.href = loginPath;
+    return null;
+  }
   try {
     const profile = await getProfile(user.id);
     if (!['admin','super_admin'].includes(profile.role)) {
-      window.location.href = '/index.html'; return null;
+      // Student on admin page — sign them out and redirect to admin login
+      await supabase.auth.signOut();
+      window.location.href = loginPath;
+      return null;
     }
     return { user, profile };
   } catch (err) {
     console.error('requireAdmin: could not load profile', err);
-    window.location.href = loginPath; return null;
+    window.location.href = loginPath;
+    return null;
   }
 }

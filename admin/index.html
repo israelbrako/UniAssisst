@@ -15,17 +15,6 @@
   <style>
     .app-content { opacity: 0; transition: opacity .2s; }
     .app-content.ready { opacity: 1; }
-    /* Admin sidebar accent color */
-    .app-sidebar { background: #0f1423; }
-    .sidebar-brand-sub { color: #3b82f6; }
-    .sidebar-nav a.active { background: rgba(59,130,246,.15); color: #93c5fd; }
-    .sidebar-nav a:hover  { background: rgba(255,255,255,.06); }
-    .admin-role-badge {
-      display: inline-block; background: #3b82f6; color: #fff;
-      font-size: 0.6rem; font-weight: 800; letter-spacing: 0.08em;
-      text-transform: uppercase; padding: 0.1rem 0.4rem; border-radius: 3px;
-      vertical-align: middle; margin-left: 0.3rem;
-    }
   </style>
 </head>
 <body>
@@ -33,53 +22,8 @@
   <div class="app-layout">
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-    <!-- ── Admin Sidebar ──────────────────────────────────────── -->
-    <aside class="app-sidebar" id="app-sidebar">
-      <a class="sidebar-brand" href="../index.html">
-        <img src="../img/umat.jpg" alt="UMAT" />
-        <div>
-          <span class="sidebar-brand-text">UniAssist</span>
-          <span class="sidebar-brand-sub" id="role-label">Staff</span>
-        </div>
-      </a>
-
-      <nav class="sidebar-nav" id="sidebar-nav">
-        <a href="index.html" class="active">
-          <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
-          <span class="nav-label">Queue</span>
-        </a>
-        <a href="my-work.html">
-          <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-          <span class="nav-label">My Work</span>
-        </a>
-        <a href="history.html">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <span class="nav-label">History</span>
-        </a>
-        <a href="team.html">
-          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span class="nav-label">Team</span>
-        </a>
-        <a href="super.html" id="super-link" style="display:none">
-          <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-          <span class="nav-label">Super Admin</span>
-        </a>
-      </nav>
-
-      <div class="sidebar-footer">
-        <div class="sidebar-user">
-          <div class="sidebar-avatar" id="sidebar-avatar">?</div>
-          <div class="sidebar-user-info">
-            <div class="sidebar-user-name" id="sidebar-name">Loading…</div>
-            <div class="sidebar-user-role" id="sidebar-role">Admin</div>
-          </div>
-        </div>
-        <button class="sidebar-signout" id="signout-btn">
-          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Sign out
-        </button>
-      </div>
-    </aside>
+    <!-- ── Admin Sidebar (populated by buildSidebar) ─────────── -->
+    <aside class="app-sidebar admin-layout" id="app-sidebar"></aside>
 
     <!-- ── Main content ───────────────────────────────────────── -->
     <div class="app-content" id="app-content">
@@ -165,7 +109,7 @@
   <script src="../js/main.js?v=5"></script>
   <script type="module">
     import { supabase, requireAdmin } from '../js/lib/supabase.js';
-    import { badge, timeAgo, fmtDate, escHtml } from '../js/lib/ui.js';
+    import { badge, timeAgo, fmtDate, escHtml, buildSidebar } from '../js/lib/ui.js';
     import { startSessionTimer } from '../js/lib/session.js';
 
     let allRequests = [];
@@ -177,23 +121,18 @@
         const { user, profile } = auth;
 
         const firstName = profile.full_name?.split(' ')[0] ?? '';
-        const initials  = profile.full_name?.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase() ?? '?';
-        const isSuperAdmin = profile.role === 'super_admin';
-
         document.getElementById('greeting').textContent = `Good day, ${firstName}`;
-        document.getElementById('sidebar-name').textContent = profile.full_name ?? '';
-        document.getElementById('sidebar-avatar').textContent = initials;
-        document.getElementById('sidebar-role').textContent = isSuperAdmin ? 'Super Admin' : 'Admin';
         document.getElementById('year').textContent = new Date().getFullYear();
-        if (isSuperAdmin) {
-          document.getElementById('role-label').textContent = 'Super Admin';
-          document.getElementById('super-link').style.display = 'flex';
-        }
 
-        setupSidebar();
-        document.getElementById('signout-btn').addEventListener('click', async () => {
-          await supabase.auth.signOut();
-          window.location.href = 'login.html';
+        buildSidebar({
+          role: profile.role,
+          profile,
+          active: 'queue',
+          basePath: '../',
+          onSignout: async () => {
+            await supabase.auth.signOut();
+            window.location.href = 'login.html';
+          },
         });
 
         startSessionTimer('login.html');
@@ -207,13 +146,6 @@
         console.error('Admin init error:', err);
         window.location.href = 'login.html';
       }
-    }
-
-    function setupSidebar() {
-      const toggle  = document.getElementById('sidebar-toggle');
-      const overlay = document.getElementById('sidebar-overlay');
-      toggle?.addEventListener('click', () => document.body.classList.add('sidebar-open-app'));
-      overlay?.addEventListener('click', () => document.body.classList.remove('sidebar-open-app'));
     }
 
     async function loadQueue() {

@@ -11,100 +11,86 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/styles.css?v=5" />
+  <link rel="stylesheet" href="../css/app.css?v=1" />
+  <style>
+    .app-content { opacity: 0; transition: opacity .2s; }
+    .app-content.ready { opacity: 1; }
+  </style>
 </head>
-<body class="app-shell">
+<body>
+  <div class="app-layout">
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <aside class="app-sidebar" id="app-sidebar"></aside>
 
-  <header class="site-header">
-    <div class="container header-inner">
-      <a class="logo" href="../index.html">
-        <img class="logo-img" src="../img/umat.jpg" alt="UMAT logo" />
-        UniAssist
-      </a>
-      <ul class="top-nav" role="list"></ul>
-      <button class="menu-toggle" type="button" aria-controls="nav-drawer" aria-expanded="false" aria-label="Open menu">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </header>
-  <nav class="nav-drawer" id="nav-drawer"></nav>
-
-  <main class="app-main">
-    <div class="container" style="max-width:780px">
-      <a href="index.html" style="display:inline-flex;align-items:center;gap:0.3rem;color:var(--muted);text-decoration:none;font-size:0.9rem;margin-bottom:1rem">← My Requests</a>
-
-      <!-- Request header -->
-      <div id="req-header" class="page-hd">
-        <div><h1 id="req-title">Loading…</h1><p id="req-meta"></p></div>
-        <div id="req-badge"></div>
+    <div class="app-content" id="app-content">
+      <div class="app-topbar">
+        <button class="sidebar-toggle" id="sidebar-toggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <a class="logo" href="../index.html"><img class="logo-img" src="../img/umat.jpg" alt="UMAT" /> UniAssist</a>
       </div>
 
-      <!-- Submitted banner -->
-      <div id="new-banner" class="form-success" hidden>
-        Your request has been submitted. We've assigned it to an available team member and they'll respond shortly.
-      </div>
+      <div class="app-content-inner" style="max-width:860px">
+        <a href="index.html" style="display:inline-flex;align-items:center;gap:0.3rem;color:var(--muted);text-decoration:none;font-size:0.88rem;margin-bottom:1rem">← My Requests</a>
 
-      <!-- Declined reason -->
-      <div id="decline-box" class="form-error" hidden>
-        <strong>Request declined.</strong> <span id="decline-reason"></span>
-      </div>
-
-      <div style="display:grid;gap:1rem" id="body-grid">
-        <!-- Left: details + timeline -->
-        <div>
-          <div class="panel" id="details-panel">
-            <div class="panel-hd"><h2>Details</h2></div>
-            <dl id="req-details"></dl>
-          </div>
-
-          <div class="panel">
-            <div class="panel-hd"><h2>Status timeline</h2></div>
-            <ul class="timeline" id="timeline">
-              <li style="color:var(--muted);font-size:0.9rem">Loading…</li>
-            </ul>
-          </div>
+        <div class="app-page-hd">
+          <div><h1 id="req-title">Loading…</h1><p id="req-meta"></p></div>
+          <div id="req-badge"></div>
         </div>
 
-        <!-- Right: chat -->
-        <div id="chat-section" hidden>
-          <div class="panel" style="padding:0">
-            <div class="panel-hd" style="padding:0.85rem 1rem 0.75rem;border-bottom:1px solid var(--line)">
-              <h2 style="margin:0">Chat with <span id="admin-name">your tutor</span></h2>
+        <div id="new-banner" class="form-success" hidden>
+          Your request has been submitted. We've assigned it to an available team member and they'll respond shortly.
+        </div>
+        <div id="decline-box" class="form-error" hidden>
+          <strong>Request declined.</strong> <span id="decline-reason"></span>
+        </div>
+
+        <div style="display:grid;gap:1rem" id="body-grid">
+          <!-- Left: details + timeline -->
+          <div>
+            <div class="content-panel">
+              <div class="content-panel-hd"><h2>Details</h2></div>
+              <div class="content-panel-body"><dl id="req-details"></dl></div>
             </div>
-            <div class="chat-wrap" style="border:none;border-radius:0">
-              <div class="chat-messages" id="chat-messages">
-                <p style="color:var(--muted);font-size:0.88rem;text-align:center;margin:auto">No messages yet. Say hello!</p>
+            <div class="content-panel">
+              <div class="content-panel-hd"><h2>Status Timeline</h2></div>
+              <div class="content-panel-body">
+                <ul class="timeline" id="timeline">
+                  <li style="color:var(--muted);font-size:0.9rem">Loading…</li>
+                </ul>
               </div>
-              <div class="chat-input-row">
-                <textarea id="msg-input" placeholder="Type a message…" rows="1"></textarea>
-                <button class="btn btn-primary" id="send-btn" style="width:auto;min-height:42px;padding:0 1rem">Send</button>
+            </div>
+          </div>
+
+          <!-- Right: chat -->
+          <div id="chat-section" hidden>
+            <div class="content-panel" style="padding:0">
+              <div class="content-panel-hd" style="padding:0.85rem 1.25rem 0.75rem">
+                <h2>Chat with <span id="admin-name">your tutor</span></h2>
+              </div>
+              <div class="chat-wrap" style="border:none;border-radius:0">
+                <div class="chat-messages" id="chat-messages">
+                  <p style="color:var(--muted);font-size:0.88rem;text-align:center;margin:auto">No messages yet. Say hello!</p>
+                </div>
+                <div class="chat-input-row">
+                  <textarea id="msg-input" placeholder="Type a message…" rows="1"></textarea>
+                  <button class="btn btn-primary" id="send-btn" style="width:auto;min-height:42px;padding:0 1rem">Send</button>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </main>
 
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <p>© <span id="year"></span> UniAssist · ASCES Department</p>
+      <footer class="site-footer">
+        <div class="container footer-inner"><p>© <span id="year"></span> UniAssist · ASCES Department</p></div>
+        <div class="container footer-credit-row"><div class="webverse-credit"><span>Developed by</span><div class="webverse-credit-img-wrap"><img src="../img/webverse-logo-color.png" alt="WebVerse" /></div></div></div>
+      </footer>
     </div>
-    <div class="container" style="padding-top:0.6rem;border-top:1px solid rgba(247,241,228,.08);margin-top:0.6rem">
-    <div class="container footer-credit-row">
-      <div class="webverse-credit">
-        <span>Developed by</span>
-        <div class="webverse-credit-img-wrap">
-          <img src="../img/webverse-logo-color.png" alt="WebVerse" />
-        </div>
-      </div>
-    </div>
-    </div>
-  </footer>
+  </div>
 
   <script src="../js/main.js?v=5"></script>
   <script type="module">
     import { supabase, requireAuth } from '../js/lib/supabase.js';
-    import { badge, timeAgo, fmtDate, buildNavbar, escHtml } from '../js/lib/ui.js';
+    import { badge, timeAgo, fmtDate, escHtml, buildSidebar } from '../js/lib/ui.js';
     import { startSessionTimer } from '../js/lib/session.js';
 
     const reqId = new URLSearchParams(location.search).get('id');
@@ -116,12 +102,15 @@
       currentUser = auth.user;
       const { profile } = auth;
 
-      if (profile.role === 'admin') { window.location.href = `../admin/request.html?id=${reqId}`; return; }
+      if (['admin','super_admin'].includes(profile.role)) { window.location.href = `../admin/request.html?id=${reqId}`; return; }
       if (!reqId) { window.location.href = 'index.html'; return; }
 
       document.getElementById('year').textContent = new Date().getFullYear();
-      buildNavbar({ role: 'student', name: profile.full_name, userId: auth.user.id, active: 'dashboard', basePath: '../' });
+      buildSidebar({ role: 'student', profile, active: 'dashboard', basePath: '../',
+        onSignout: async () => { await supabase.auth.signOut(); window.location.href = '../auth/login.html'; } });
+
       startSessionTimer('../auth/login.html');
+      document.getElementById('app-content').classList.add('ready');
 
       if (new URLSearchParams(location.search).get('new') === '1') {
         document.getElementById('new-banner').hidden = false;
@@ -133,10 +122,7 @@
 
     async function loadRequest() {
       const { data: req, error } = await supabase
-        .from('requests')
-        .select(`*, assigned_to ( id, full_name )`)
-        .eq('id', reqId)
-        .single();
+        .from('requests').select(`*, assigned_to ( id, full_name )`).eq('id', reqId).single();
 
       if (error || !req) { window.location.href = 'index.html'; return; }
 
@@ -150,46 +136,31 @@
         <div class="kv"><dt>Deadline</dt><dd>${fmtDate(req.deadline)}</dd></div>
         <div class="kv"><dt>Description</dt><dd class="note-box">${escHtml(req.description)}</dd></div>
         ${req.file_url ? `<div class="kv"><dt>File</dt><dd><a href="${escHtml(req.file_url)}" target="_blank">Download attachment</a></dd></div>` : ''}
-        ${req.assigned_to ? `<div class="kv"><dt>Assigned to</dt><dd>${escHtml(req.assigned_to.full_name)}</dd></div>` : ''}
-      `;
+        ${req.assigned_to ? `<div class="kv"><dt>Assigned to</dt><dd>${escHtml(req.assigned_to.full_name)}</dd></div>` : ''}`;
 
-      // Show/hide decline box
       if (req.status === 'declined' && req.decline_reason) {
         document.getElementById('decline-reason').textContent = req.decline_reason;
         document.getElementById('decline-box').hidden = false;
       }
 
-      // Show chat only once accepted
       const chatStatuses = ['accepted','in_progress','review','completed'];
       if (chatStatuses.includes(req.status) && req.assigned_to) {
         document.getElementById('chat-section').hidden = false;
         document.getElementById('admin-name').textContent = req.assigned_to.full_name;
-        await loadMessages(req.assigned_to.id);
-        setupChat(req.assigned_to.id);
+        await loadMessages(null);
+        setupChat();
         subscribeMessages();
       }
 
-      // Responsive layout — side by side on desktop when chat is visible
-      if (chatStatuses.includes(req.status)) {
-        document.getElementById('body-grid').style.cssText = 'display:grid;gap:1rem;grid-template-columns:1fr';
-        if (window.innerWidth >= 800) {
-          document.getElementById('body-grid').style.gridTemplateColumns = '1fr 1fr';
-        }
+      if (chatStatuses.includes(req.status) && window.innerWidth >= 800) {
+        document.getElementById('body-grid').style.gridTemplateColumns = '1fr 1fr';
       }
     }
 
     async function loadTimeline() {
-      const { data } = await supabase
-        .from('status_updates')
-        .select(`*, admin:admin_id ( full_name )`)
-        .eq('request_id', reqId)
-        .order('created_at', { ascending: true });
-
+      const { data } = await supabase.from('status_updates').select(`*, admin:admin_id ( full_name )`).eq('request_id', reqId).order('created_at', { ascending: true });
       const tl = document.getElementById('timeline');
-      if (!data || data.length === 0) {
-        tl.innerHTML = '<li style="color:var(--muted);font-size:0.88rem">No updates yet.</li>';
-        return;
-      }
+      if (!data || data.length === 0) { tl.innerHTML = '<li style="color:var(--muted);font-size:0.88rem">No updates yet.</li>'; return; }
       tl.innerHTML = data.map(u => `
         <li class="tl-item">
           <div class="tl-dot"></div>
@@ -202,87 +173,42 @@
     }
 
     async function loadMessages(adminId) {
-      const { data } = await supabase
-        .from('messages')
-        .select(`*, sender:sender_id ( full_name )`)
-        .eq('request_id', reqId)
-        .order('created_at', { ascending: true });
-
-      renderMessages(data ?? [], adminId);
-    }
-
-    function renderMessages(msgs, adminId) {
+      const { data } = await supabase.from('messages').select(`*, sender:sender_id ( full_name )`).eq('request_id', reqId).order('created_at', { ascending: true });
       const container = document.getElementById('chat-messages');
-      if (msgs.length === 0) {
-        container.innerHTML = '<p style="color:var(--muted);font-size:0.88rem;text-align:center;margin:auto">No messages yet. Say hello!</p>';
-        return;
-      }
-      container.innerHTML = msgs.map(m => {
+      if (!data || data.length === 0) { container.innerHTML = '<p style="color:var(--muted);font-size:0.88rem;text-align:center;margin:auto">No messages yet. Say hello!</p>'; return; }
+      container.innerHTML = data.map(m => {
         const mine = m.sender_id === currentUser.id;
-        return `
-          <div class="msg ${mine ? 'msg-mine' : 'msg-theirs'}">
-            <div class="msg-bubble">${escHtml(m.content)}</div>
-            <span class="msg-meta">${mine ? 'You' : escHtml(m.sender?.full_name ?? 'Admin')} · ${timeAgo(m.created_at)}</span>
-          </div>`;
+        return `<div class="msg ${mine ? 'msg-mine' : 'msg-theirs'}">
+          <div class="msg-bubble">${escHtml(m.content)}</div>
+          <span class="msg-meta">${mine ? 'You' : escHtml(m.sender?.full_name ?? 'Admin')} · ${timeAgo(m.created_at)}</span>
+        </div>`;
       }).join('');
       container.scrollTop = container.scrollHeight;
     }
 
     function setupChat() {
-      const input   = document.getElementById('msg-input');
+      const input = document.getElementById('msg-input');
       const sendBtn = document.getElementById('send-btn');
-
-      async function sendMessage() {
+      async function send() {
         const content = input.value.trim();
         if (!content) return;
-        input.value = '';
-        sendBtn.disabled = true;
-
-        const { error } = await supabase.from('messages').insert({
-          request_id: reqId,
-          sender_id:  currentUser.id,
-          content,
-        });
-
-        if (error) {
-          console.error('Send message error:', error);
-          alert('Could not send: ' + error.message);
-          input.value = content;
-          sendBtn.disabled = false;
-          return;
-        }
-
+        input.value = ''; sendBtn.disabled = true;
+        const { error } = await supabase.from('messages').insert({ request_id: reqId, sender_id: currentUser.id, content });
+        if (error) { alert('Could not send: ' + error.message); input.value = content; sendBtn.disabled = false; return; }
         await loadMessages(null);
-        sendBtn.disabled = false;
-        input.focus();
+        sendBtn.disabled = false; input.focus();
       }
-
-      sendBtn.addEventListener('click', sendMessage);
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-      });
+      sendBtn.addEventListener('click', send);
+      input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
     }
 
     function subscribeMessages() {
       supabase.channel('chat-student-' + reqId)
-        .on('postgres_changes', {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `request_id=eq.${reqId}`,
-        }, () => loadMessages(null))
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `request_id=eq.${reqId}` }, () => loadMessages(null))
         .subscribe();
-
       supabase.channel('timeline-student-' + reqId)
-        .on('postgres_changes', {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'status_updates',
-          filter: `request_id=eq.${reqId}`,
-        }, () => { loadTimeline(); loadRequest(); })
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'status_updates', filter: `request_id=eq.${reqId}` }, () => { loadTimeline(); loadRequest(); })
         .subscribe();
-
-      // Polling fallback every 3 seconds
       setInterval(() => loadMessages(null), 3000);
     }
 

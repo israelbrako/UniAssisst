@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#1a1f2e" />
+  <meta name="theme-color" content="#0c241c" />
   <link rel="icon" type="image/jpeg" href="../img/umat.jpg" />
   <link rel="apple-touch-icon" href="../img/umat.jpg" />
   <title>My Work — UniAssist Admin</title>
@@ -11,70 +11,55 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/styles.css?v=5" />
+  <link rel="stylesheet" href="../css/app.css?v=1" />
   <style>
-    .site-header { background: rgba(15,20,35,0.97); }
-    .nav-drawer  { background: #0f1423; }
-    .admin-badge { display:inline-block;background:#3b82f6;color:#fff;font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:0.15rem 0.5rem;border-radius:4px;vertical-align:middle;margin-left:0.4rem; }
+    .app-content { opacity: 0; transition: opacity .2s; }
+    .app-content.ready { opacity: 1; }
   </style>
 </head>
-<body class="app-shell">
+<body>
+  <div class="app-layout">
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <aside class="app-sidebar" id="app-sidebar"></aside>
 
-  <header class="site-header">
-    <div class="container header-inner">
-      <a class="logo" href="../index.html">
-        <img class="logo-img" src="../img/umat.jpg" alt="UMAT logo" />
-        UniAssist <span class="admin-badge">Staff</span>
-      </a>
-      <ul class="top-nav" role="list"></ul>
-      <button class="menu-toggle" type="button" aria-controls="nav-drawer" aria-expanded="false" aria-label="Open menu">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </header>
-  <nav class="nav-drawer" id="nav-drawer"></nav>
+    <div class="app-content" id="app-content">
+      <div class="app-topbar">
+        <button class="sidebar-toggle" id="sidebar-toggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <a class="logo" href="../index.html"><img class="logo-img" src="../img/umat.jpg" alt="UMAT" /> UniAssist</a>
+      </div>
 
-  <main class="app-main">
-    <div class="container">
-      <div class="page-hd">
-        <div>
+      <div class="app-content-inner">
+        <div class="app-page-hd">
           <h1 id="page-title">My Work</h1>
           <p>Requests currently assigned to you.</p>
         </div>
-      </div>
 
-      <div class="stat-strip">
-        <div class="stat-tile"><b id="s-accepted">—</b><span>Accepted</span></div>
-        <div class="stat-tile"><b id="s-inprog">—</b><span>In Progress</span></div>
-        <div class="stat-tile"><b id="s-review">—</b><span>Review</span></div>
-        <div class="stat-tile"><b id="s-done">—</b><span>Completed (all time)</span></div>
-      </div>
+        <div class="stat-grid">
+          <div class="stat-card-dark"><div class="sc-label">Accepted</div><span class="sc-value" id="s-accepted">0</span><span class="sc-sub">Awaiting start</span></div>
+          <div class="stat-card-dark"><div class="sc-label">In Progress</div><span class="sc-value" id="s-inprog">0</span><span class="sc-sub">Being handled</span></div>
+          <div class="stat-card-dark"><div class="sc-label">Review</div><span class="sc-value" id="s-review">0</span><span class="sc-sub">Student checking</span></div>
+          <div class="stat-card-dark"><div class="sc-label">Completed</div><span class="sc-value" id="s-done">0</span><span class="sc-sub">All time</span></div>
+        </div>
 
-      <div class="req-list" id="work-list">
-        <p style="color:var(--muted)">Loading…</p>
-      </div>
-    </div>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <p>© <span id="year"></span> UniAssist · ASCES Department</p>
-    </div>
-    <div class="container" style="padding-top:0.6rem;border-top:1px solid rgba(247,241,228,.08);margin-top:0.6rem">
-    <div class="container footer-credit-row">
-      <div class="webverse-credit">
-        <span>Developed by</span>
-        <div class="webverse-credit-img-wrap">
-          <img src="../img/webverse-logo-color.png" alt="WebVerse" />
+        <div class="content-panel">
+          <div class="content-panel-hd"><h2>Active Work</h2></div>
+          <div class="content-panel-body">
+            <div id="work-list" class="req-list"></div>
+          </div>
         </div>
       </div>
+
+      <footer class="site-footer">
+        <div class="container footer-inner"><p>© <span id="year"></span> UniAssist · ASCES Department</p></div>
+        <div class="container footer-credit-row"><div class="webverse-credit"><span>Developed by</span><div class="webverse-credit-img-wrap"><img src="../img/webverse-logo-color.png" alt="WebVerse" /></div></div></div>
+      </footer>
     </div>
-    </div>
-  </footer>
+  </div>
 
   <script src="../js/main.js?v=5"></script>
   <script type="module">
     import { supabase, requireAdmin } from '../js/lib/supabase.js';
-    import { badge, timeAgo, fmtDate, buildNavbar, escHtml } from '../js/lib/ui.js';
+    import { badge, timeAgo, fmtDate, escHtml, buildSidebar } from '../js/lib/ui.js';
     import { startSessionTimer } from '../js/lib/session.js';
 
     async function init() {
@@ -82,13 +67,17 @@
       if (!auth) return;
       const { user, profile } = auth;
 
+      const firstName = profile.full_name?.split(' ')[0] ?? '';
+      document.getElementById('page-title').textContent = `My Work — ${firstName}`;
       document.getElementById('year').textContent = new Date().getFullYear();
-      document.getElementById('page-title').textContent = `My Work — ${profile.full_name.split(' ')[0]}`;
-      buildNavbar({ role: 'admin', name: profile.full_name, userId: user.id, active: 'my-work', basePath: '../', isSuperAdmin: profile.role === 'super_admin' });
+
+      buildSidebar({ role: profile.role, profile, active: 'my-work', basePath: '../',
+        onSignout: async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; } });
+
       startSessionTimer('login.html');
+      document.getElementById('app-content').classList.add('ready');
 
       await loadWork(user.id);
-
       supabase.channel('my-work-' + user.id)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'requests', filter: `assigned_to=eq.${user.id}` }, () => loadWork(user.id))
         .subscribe();
@@ -97,10 +86,7 @@
     async function loadWork(userId) {
       const { data, error } = await supabase
         .from('requests')
-        .select(`
-          id, service, title, status, created_at, deadline,
-          student:student_id ( full_name, email )
-        `)
+        .select(`id, service, title, status, created_at, deadline, student:student_id ( full_name, email )`)
         .eq('assigned_to', userId)
         .not('status', 'in', '("declined","pending")')
         .order('created_at', { ascending: false });
@@ -108,7 +94,6 @@
       if (error) { console.error(error); return; }
       const all = data ?? [];
 
-      // Stats
       document.getElementById('s-accepted').textContent = all.filter(r => r.status === 'accepted').length;
       document.getElementById('s-inprog').textContent   = all.filter(r => r.status === 'in_progress').length;
       document.getElementById('s-review').textContent   = all.filter(r => r.status === 'review').length;
@@ -124,10 +109,7 @@
 
       list.innerHTML = active.map(r => `
         <a class="req-card" href="request.html?id=${r.id}">
-          <div class="req-card-top">
-            <h3>${escHtml(r.title)}</h3>
-            ${badge(r.status)}
-          </div>
+          <div class="req-card-top"><h3>${escHtml(r.title)}</h3>${badge(r.status)}</div>
           <div class="req-card-meta">
             <span>${escHtml(r.service)}</span>
             <span>${escHtml(r.student?.full_name ?? '')}</span>

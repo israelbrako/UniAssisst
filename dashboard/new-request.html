@@ -11,120 +11,103 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/styles.css?v=5" />
+  <link rel="stylesheet" href="../css/app.css?v=1" />
+  <style>
+    .app-content { opacity: 0; transition: opacity .2s; }
+    .app-content.ready { opacity: 1; }
+  </style>
 </head>
-<body class="app-shell">
+<body>
+  <div class="app-layout">
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <aside class="app-sidebar" id="app-sidebar"></aside>
 
-  <header class="site-header">
-    <div class="container header-inner">
-      <a class="logo" href="../index.html">
-        <img class="logo-img" src="../img/umat.jpg" alt="UMAT logo" />
-        UniAssist
-      </a>
-      <ul class="top-nav" role="list"></ul>
-      <button class="menu-toggle" type="button" aria-controls="nav-drawer" aria-expanded="false" aria-label="Open menu">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </header>
-  <nav class="nav-drawer" id="nav-drawer"></nav>
-
-  <main class="app-main">
-    <div class="container" style="max-width:680px">
-      <div class="page-hd">
-        <div>
-          <h1>New request</h1>
-          <p>Tell us what you need — the more detail, the faster we can help.</p>
-        </div>
-        <a href="index.html" class="btn btn-ghost dark" style="align-self:flex-start">← Back</a>
+    <div class="app-content" id="app-content">
+      <div class="app-topbar">
+        <button class="sidebar-toggle" id="sidebar-toggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <a class="logo" href="../index.html"><img class="logo-img" src="../img/umat.jpg" alt="UMAT" /> UniAssist</a>
       </div>
 
-      <div class="panel">
-        <div id="form-error" class="form-error" hidden></div>
-        <div id="form-success" class="form-success" hidden>
-          ✅ Request submitted! Redirecting you to track it…
+      <div class="app-content-inner" style="max-width:680px">
+        <div class="app-page-hd">
+          <div>
+            <h1>New request</h1>
+            <p>Tell us what you need — the more detail, the faster we can help.</p>
+          </div>
+          <a href="index.html" class="btn btn-ghost dark" style="align-self:flex-start;width:auto;min-height:36px;padding:0.3rem 0.9rem">← Back</a>
         </div>
 
-        <form id="request-form" novalidate>
-          <div class="field">
-            <label for="service">Type of help</label>
-            <select id="service" name="service" required>
-              <option value="">— Select a service —</option>
-              <option value="Assignments">Assignments</option>
-              <option value="Projects">Projects</option>
-              <option value="One-on-One Tutorial">One-on-One Tutorial</option>
-              <option value="Group Tutorial">Group Tutorial</option>
-            </select>
-          </div>
+        <div class="content-panel">
+          <div class="content-panel-body">
+            <div id="form-error" class="form-error" hidden></div>
+            <div id="form-success" class="form-success" hidden>✅ Request submitted! Redirecting you to track it…</div>
 
-          <div class="field">
-            <label for="title">Short title</label>
-            <input type="text" id="title" name="title" required maxlength="120" placeholder="e.g. Help with Data Structures assignment" />
+            <form id="request-form" novalidate>
+              <div class="field">
+                <label for="service">Type of help</label>
+                <select id="service" name="service" required>
+                  <option value="">— Select a service —</option>
+                  <option value="Assignments">Assignments</option>
+                  <option value="Projects">Projects</option>
+                  <option value="One-on-One Tutorial">One-on-One Tutorial</option>
+                  <option value="Group Tutorial">Group Tutorial</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="title">Short title</label>
+                <input type="text" id="title" name="title" required maxlength="120" placeholder="e.g. Help with Data Structures assignment" />
+              </div>
+              <div class="field">
+                <label for="description">Full description</label>
+                <textarea id="description" name="description" rows="5" required placeholder="Describe exactly what you need help with. Include the module name, what you're stuck on, and any other relevant details."></textarea>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+                <div class="field">
+                  <label for="program">Programme</label>
+                  <select id="program" name="program" required>
+                    <option value="">— Select programme —</option>
+                    <option value="Cyber Security">Cyber Security</option>
+                    <option value="Information Systems">Information Systems</option>
+                    <option value="Computer Science and Engineering">Computer Science and Engineering</option>
+                    <option value="AI and Robotics Engineering">AI and Robotics Engineering</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="class_year">Year</label>
+                  <select id="class_year" name="class_year" required>
+                    <option value="">— Select year —</option>
+                    <option value="Year 1">Year 1</option>
+                    <option value="Year 2">Year 2</option>
+                    <option value="Year 3">Year 3</option>
+                    <option value="Year 4">Year 4</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label for="deadline">Your deadline</label>
+                <input type="date" id="deadline" name="deadline" />
+              </div>
+              <div class="field">
+                <label for="file">Attach a file <span style="font-weight:400;color:var(--muted)">(optional — PDF, DOCX, images)</span></label>
+                <input type="file" id="file" name="file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt" />
+              </div>
+              <button type="submit" class="btn btn-primary" id="submit-btn" style="margin-top:0.5rem">Submit request</button>
+            </form>
           </div>
-
-          <div class="field">
-            <label for="description">Full description</label>
-            <textarea id="description" name="description" rows="5" required
-              placeholder="Describe exactly what you need help with. Include the module name, what you're stuck on, and any other relevant details."></textarea>
-          </div>
-
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
-            <div class="field">
-              <label for="program">Programme</label>
-              <select id="program" name="program" required>
-                <option value="">— Select programme —</option>
-                <option value="Cyber Security">Cyber Security</option>
-                <option value="Information Systems">Information Systems</option>
-                <option value="Computer Science and Engineering">Computer Science and Engineering</option>
-                <option value="AI and Robotics Engineering">AI and Robotics Engineering</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="class_year">Year</label>
-              <select id="class_year" name="class_year" required>
-                <option value="">— Select year —</option>
-                <option value="Year 1">Year 1</option>
-                <option value="Year 2">Year 2</option>
-                <option value="Year 3">Year 3</option>
-                <option value="Year 4">Year 4</option>
-              </select>
-            </div>
-          </div>
-          <div class="field">
-            <label for="deadline">Your deadline</label>
-            <input type="date" id="deadline" name="deadline" />
-          </div>
-
-          <div class="field">
-            <label for="file">Attach a file <span style="font-weight:400;color:var(--muted)">(optional — PDF, DOCX, images)</span></label>
-            <input type="file" id="file" name="file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt" />
-          </div>
-
-          <button type="submit" class="btn btn-primary" id="submit-btn" style="margin-top:0.5rem">Submit request</button>
-        </form>
-      </div>
-    </div>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <p>© <span id="year"></span> UniAssist · ASCES Department</p>
-    </div>
-    <div class="container" style="padding-top:0.6rem;border-top:1px solid rgba(247,241,228,.08);margin-top:0.6rem">
-    <div class="container footer-credit-row">
-      <div class="webverse-credit">
-        <span>Developed by</span>
-        <div class="webverse-credit-img-wrap">
-          <img src="../img/webverse-logo-color.png" alt="WebVerse" />
         </div>
       </div>
+
+      <footer class="site-footer">
+        <div class="container footer-inner"><p>© <span id="year"></span> UniAssist · ASCES Department</p></div>
+        <div class="container footer-credit-row"><div class="webverse-credit"><span>Developed by</span><div class="webverse-credit-img-wrap"><img src="../img/webverse-logo-color.png" alt="WebVerse" /></div></div></div>
+      </footer>
     </div>
-    </div>
-  </footer>
+  </div>
 
   <script src="../js/main.js?v=5"></script>
   <script type="module">
     import { supabase, requireAuth } from '../js/lib/supabase.js';
-    import { buildNavbar } from '../js/lib/ui.js';
+    import { buildSidebar } from '../js/lib/ui.js';
     import { startSessionTimer } from '../js/lib/session.js';
 
     async function init() {
@@ -133,11 +116,14 @@
       const { user, profile } = auth;
 
       if (['admin','super_admin'].includes(profile.role)) { window.location.href = '../admin/index.html'; return; }
-      document.getElementById('year').textContent = new Date().getFullYear();
-      buildNavbar({ role: 'student', name: profile.full_name, userId: user.id, active: 'new', basePath: '../' });
-      startSessionTimer('../auth/login.html');
 
-      document.getElementById('request-form').addEventListener('submit', (e) => handleSubmit(e, user, profile));
+      document.getElementById('year').textContent = new Date().getFullYear();
+      buildSidebar({ role: 'student', profile, active: 'new', basePath: '../',
+        onSignout: async () => { await supabase.auth.signOut(); window.location.href = '../auth/login.html'; } });
+
+      startSessionTimer('../auth/login.html');
+      document.getElementById('app-content').classList.add('ready');
+      document.getElementById('request-form').addEventListener('submit', e => handleSubmit(e, user, profile));
     }
 
     async function handleSubmit(e, user, profile) {
@@ -157,59 +143,40 @@
 
       if (!service || !title || !description || !program || !classYear) {
         errEl.textContent = 'Please fill all required fields.';
-        errEl.hidden = false;
-        return;
+        errEl.hidden = false; return;
       }
 
-      btn.textContent = 'Submitting…';
-      btn.disabled    = true;
+      btn.textContent = 'Submitting…'; btn.disabled = true;
 
       try {
-        // Upload file if provided
         let fileUrl = null;
         if (fileInput.files[0]) {
           const file = fileInput.files[0];
           const path = `${user.id}/${Date.now()}-${file.name}`;
-          const { data: uploadData, error: uploadErr } = await supabase.storage
-            .from('request-files')
-            .upload(path, file);
+          const { error: uploadErr } = await supabase.storage.from('request-files').upload(path, file);
           if (uploadErr) throw uploadErr;
           const { data: { publicUrl } } = supabase.storage.from('request-files').getPublicUrl(path);
           fileUrl = publicUrl;
         }
 
-        // Insert request — auto-assignment Edge Function fires on insert
-        const { data: req, error } = await supabase
-          .from('requests')
-          .insert({
-            student_id:  user.id,
-            service,
-            title,
-            description,
-            class_year:  `${program} — ${classYear}`,
-            deadline,
-            file_url:    fileUrl,
-            status:      'pending',
-          })
-          .select()
-          .single();
+        const { data: req, error } = await supabase.from('requests').insert({
+          student_id:  user.id,
+          service, title, description,
+          class_year:  `${program} — ${classYear}`,
+          deadline, file_url: fileUrl, status: 'pending',
+        }).select().single();
 
         if (error) throw error;
 
-        // Show success before redirect so user knows it worked
-        const succEl = document.getElementById('form-success');
-        succEl.hidden = false;
+        document.getElementById('form-success').hidden = false;
         btn.textContent = 'Submitted!';
         form.reset();
+        setTimeout(() => { window.location.href = `request.html?id=${req.id}&new=1`; }, 1200);
 
-        setTimeout(() => {
-          window.location.href = `request.html?id=${req.id}&new=1`;
-        }, 1200);
       } catch (err) {
         errEl.textContent = err.message || 'Could not submit. Please try again.';
         errEl.hidden = false;
-        btn.textContent = 'Submit request';
-        btn.disabled    = false;
+        btn.textContent = 'Submit request'; btn.disabled = false;
       }
     }
 

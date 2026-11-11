@@ -205,3 +205,109 @@ async function signOut(basePath) {
   await supabase.auth.signOut();
   window.location.href = `${basePath}auth/login.html`;
 }
+
+/* ── Build sidebar layout ──────────────────────────────────── */
+/**
+ * buildSidebar(opts)
+ * opts.role         — 'student' | 'admin' | 'super_admin'
+ * opts.profile      — { full_name, role }
+ * opts.active       — active nav key
+ * opts.basePath     — '../' for subfolders
+ * opts.onSignout    — async function to call on sign out
+ */
+export function buildSidebar(opts = {}) {
+  const { role = 'student', profile = {}, active = '', basePath = '', onSignout } = opts;
+  const isSuperAdmin = role === 'super_admin';
+  const isAdmin      = role === 'admin' || isSuperAdmin;
+  const firstName    = (profile.full_name ?? '').split(' ')[0] ?? '?';
+  const initials     = (profile.full_name ?? '?').split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
+
+  const studentLinks = [
+    { key: 'dashboard', href: `${basePath}dashboard/index.html`,       label: 'Dashboard',   icon: 'home' },
+    { key: 'requests',  href: `${basePath}dashboard/index.html`,       label: 'My Requests', icon: 'file' },
+    { key: 'new',       href: `${basePath}dashboard/new-request.html`, label: 'New Request', icon: 'plus-circle' },
+  ];
+
+  const adminLinks = [
+    { key: 'queue',    href: `${basePath}admin/index.html`,    label: 'Queue',       icon: 'clipboard' },
+    { key: 'my-work',  href: `${basePath}admin/my-work.html`,  label: 'My Work',     icon: 'monitor' },
+    { key: 'history',  href: `${basePath}admin/history.html`,  label: 'History',     icon: 'clock' },
+    { key: 'team',     href: `${basePath}admin/team.html`,     label: 'Team',        icon: 'users' },
+  ];
+  if (isSuperAdmin) {
+    adminLinks.push({ key: 'super', href: `${basePath}admin/super.html`, label: 'Super Admin', icon: 'zap' });
+  }
+
+  const links = isAdmin ? adminLinks : studentLinks;
+  const roleLabel = isSuperAdmin ? 'Super Admin' : isAdmin ? 'Staff' : 'Student';
+
+  const svgMap = {
+    home:        `<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>`,
+    file:        `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>`,
+    'plus-circle':`<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>`,
+    clipboard:   `<path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/>`,
+    monitor:     `<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>`,
+    clock:       `<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>`,
+    users:       `<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`,
+    zap:         `<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>`,
+    logout:      `<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>`,
+  };
+
+  function svg(key) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${svgMap[key] ?? ''}</svg>`;
+  }
+
+  // Set body class for admin green theme
+  if (isAdmin) document.body.closest('body')?.classList.add('admin-layout');
+
+  const sidebar = document.getElementById('app-sidebar');
+  if (!sidebar) return;
+
+  sidebar.innerHTML = `
+    <a class="sidebar-brand" href="${basePath}index.html">
+      <img src="${basePath}img/umat.jpg" alt="UMAT" />
+      <div>
+        <span class="sidebar-brand-text">UniAssist</span>
+        <span class="sidebar-brand-sub">${escHtml(roleLabel)}</span>
+      </div>
+    </a>
+
+    <nav class="sidebar-nav">
+      ${links.map(l => `
+        <a href="${l.href}" class="${active === l.key ? 'active' : ''}">
+          ${svg(l.icon)}
+          <span class="nav-label">${escHtml(l.label)}</span>
+        </a>`).join('')}
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">${escHtml(initials)}</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name">${escHtml(profile.full_name ?? '')}</div>
+          <div class="sidebar-user-role">${escHtml(roleLabel)}</div>
+        </div>
+      </div>
+      <button class="sidebar-signout" id="sidebar-signout-btn">
+        ${svg('logout')} Sign out
+      </button>
+    </div>`;
+
+  // Wire sign out
+  document.getElementById('sidebar-signout-btn')?.addEventListener('click', async () => {
+    if (onSignout) await onSignout();
+  });
+
+  // Wire mobile toggle
+  document.getElementById('sidebar-toggle')?.addEventListener('click', () => {
+    document.body.classList.add('sidebar-open-app');
+  });
+  document.getElementById('sidebar-overlay')?.addEventListener('click', () => {
+    document.body.classList.remove('sidebar-open-app');
+  });
+
+  // Close sidebar when nav link clicked on mobile
+  sidebar.querySelectorAll('.sidebar-nav a').forEach(a => {
+    a.addEventListener('click', () => document.body.classList.remove('sidebar-open-app'));
+  });
+}

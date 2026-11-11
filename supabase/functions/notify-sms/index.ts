@@ -137,8 +137,12 @@ function buildMessage(type: string, body: string, name: string): string {
       return `Hi ${firstName}, you have a new message on your UniAssist request. Log in to reply: uniassist-eight.vercel.app`;
 
     case 'new_request':
-      // This goes to admins
-      return `UniAssist: A new request has been assigned to you. Log in to review it: uniassist-eight.vercel.app/admin`;
+      // This goes to admins — body contains "student_name|request_title"
+      const parts = body.split('|');
+      const studentName = parts[0] ?? 'A student';
+      const reqTitle    = parts[1] ?? 'a new request';
+      const adminFirst  = name.split(' ')[0];
+      return `Yo ${adminFirst}! You've been assigned to ${studentName}. Log in to your dashboard to review their request: uniassist-eight.vercel.app/admin`;
 
     default:
       return body.length > 140 ? body.slice(0, 137) + '...' : body;

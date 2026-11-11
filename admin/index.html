@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#1a1f2e" />
+  <meta name="theme-color" content="#0c241c" />
   <link rel="icon" type="image/jpeg" href="../img/umat.jpg" />
   <link rel="apple-touch-icon" href="../img/umat.jpg" />
   <title>Queue — UniAssist Admin</title>
@@ -11,86 +11,161 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/styles.css?v=5" />
+  <link rel="stylesheet" href="../css/app.css?v=1" />
   <style>
-    /* Admin-specific overrides — dark navy theme to distinguish from student side */
-    .site-header { background: rgba(15,20,35,0.97); }
-    .nav-drawer  { background: #0f1423; }
-    .top-nav .btn-primary { background: #3b82f6; color: #fff; }
-    .admin-badge {
+    .app-content { opacity: 0; transition: opacity .2s; }
+    .app-content.ready { opacity: 1; }
+    /* Admin sidebar accent color */
+    .app-sidebar { background: #0f1423; }
+    .sidebar-brand-sub { color: #3b82f6; }
+    .sidebar-nav a.active { background: rgba(59,130,246,.15); color: #93c5fd; }
+    .sidebar-nav a:hover  { background: rgba(255,255,255,.06); }
+    .admin-role-badge {
       display: inline-block; background: #3b82f6; color: #fff;
-      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em;
-      text-transform: uppercase; padding: 0.15rem 0.5rem; border-radius: 4px;
-      vertical-align: middle; margin-left: 0.4rem;
+      font-size: 0.6rem; font-weight: 800; letter-spacing: 0.08em;
+      text-transform: uppercase; padding: 0.1rem 0.4rem; border-radius: 3px;
+      vertical-align: middle; margin-left: 0.3rem;
     }
-    .app-main { opacity: 0; transition: opacity .2s; }
-    .app-main.ready { opacity: 1; }
   </style>
 </head>
-<body class="app-shell">
+<body>
 
-  <header class="site-header">
-    <div class="container header-inner">
-      <a class="logo" href="../index.html">
-        <img class="logo-img" src="../img/umat.jpg" alt="UMAT logo" />
-        UniAssist <span class="admin-badge">Staff</span>
+  <div class="app-layout">
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- ── Admin Sidebar ──────────────────────────────────────── -->
+    <aside class="app-sidebar" id="app-sidebar">
+      <a class="sidebar-brand" href="../index.html">
+        <img src="../img/umat.jpg" alt="UMAT" />
+        <div>
+          <span class="sidebar-brand-text">UniAssist</span>
+          <span class="sidebar-brand-sub" id="role-label">Staff</span>
+        </div>
       </a>
-      <ul class="top-nav" role="list"></ul>
-      <button class="menu-toggle" type="button" aria-controls="nav-drawer" aria-expanded="false" aria-label="Open menu">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </header>
-  <nav class="nav-drawer" id="nav-drawer"></nav>
 
-  <main class="app-main" id="app-main">
-    <div class="container">
-      <div class="greeting-banner">
-        <h1 id="greeting">Queue</h1>
-        <p>All incoming and assigned requests waiting for action.</p>
-      </div>
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <a href="index.html" class="active">
+          <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+          <span class="nav-label">Queue</span>
+        </a>
+        <a href="my-work.html">
+          <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          <span class="nav-label">My Work</span>
+        </a>
+        <a href="history.html">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span class="nav-label">History</span>
+        </a>
+        <a href="team.html">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span class="nav-label">Team</span>
+        </a>
+        <a href="super.html" id="super-link" style="display:none">
+          <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span class="nav-label">Super Admin</span>
+        </a>
+      </nav>
 
-      <div class="stat-strip">
-        <div class="stat-tile"><b id="s-pending">0</b><span>Pending</span></div>
-        <div class="stat-tile"><b id="s-assigned">0</b><span>Assigned</span></div>
-        <div class="stat-tile"><b id="s-active">0</b><span>In Progress</span></div>
-        <div class="stat-tile"><b id="s-today">0</b><span>Today</span></div>
-      </div>
-
-      <div class="panel" style="overflow-x:auto">
-        <div class="panel-hd">
-          <h2>Requests</h2>
-          <select id="filter-status" style="min-height:32px;padding:0.2rem 0.6rem;border:1px solid var(--line);border-radius:6px;font:inherit;font-size:0.85rem">
-            <option value="">All statuses</option>
-            <option value="pending">Pending</option>
-            <option value="assigned">Assigned</option>
-            <option value="accepted">Accepted</option>
-            <option value="in_progress">In Progress</option>
-            <option value="review">Review</option>
-          </select>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar" id="sidebar-avatar">?</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="sidebar-name">Loading…</div>
+            <div class="sidebar-user-role" id="sidebar-role">Admin</div>
+          </div>
         </div>
-        <div id="queue-wrap"></div>
+        <button class="sidebar-signout" id="signout-btn">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign out
+        </button>
       </div>
-    </div>
-  </main>
+    </aside>
 
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <p>© <span id="year"></span> UniAssist · ASCES Department</p>
-    </div>
-    <div class="container footer-credit-row">
-      <div class="webverse-credit">
-        <span>Developed by</span>
-        <div class="webverse-credit-img-wrap">
-          <img src="../img/webverse-logo-color.png" alt="WebVerse" />
-        </div>
+    <!-- ── Main content ───────────────────────────────────────── -->
+    <div class="app-content" id="app-content">
+
+      <div class="app-topbar">
+        <button class="sidebar-toggle" id="sidebar-toggle">
+          <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <a class="logo" href="../index.html">
+          <img class="logo-img" src="../img/umat.jpg" alt="UMAT" />
+          UniAssist
+        </a>
       </div>
+
+      <div class="app-content-inner">
+
+        <div class="app-page-hd">
+          <h1 id="greeting">Queue</h1>
+          <p>All incoming and assigned requests waiting for action.</p>
+        </div>
+
+        <!-- Dark stat cards -->
+        <div class="stat-grid">
+          <div class="stat-card-dark">
+            <div class="sc-label">Pending</div>
+            <span class="sc-value" id="s-pending">0</span>
+            <span class="sc-sub">Unassigned</span>
+          </div>
+          <div class="stat-card-dark">
+            <div class="sc-label">Assigned</div>
+            <span class="sc-value" id="s-assigned">0</span>
+            <span class="sc-sub">Awaiting action</span>
+          </div>
+          <div class="stat-card-dark">
+            <div class="sc-label">In Progress</div>
+            <span class="sc-value" id="s-active">0</span>
+            <span class="sc-sub">Being handled</span>
+          </div>
+          <div class="stat-card-dark">
+            <div class="sc-label">Today</div>
+            <span class="sc-value" id="s-today">0</span>
+            <span class="sc-sub">New today</span>
+          </div>
+        </div>
+
+        <!-- Queue panel -->
+        <div class="content-panel">
+          <div class="content-panel-hd">
+            <h2>Requests</h2>
+            <select id="filter-status" style="min-height:30px;padding:0.2rem 0.6rem;border:1px solid var(--line);border-radius:6px;font:inherit;font-size:0.82rem">
+              <option value="">All statuses</option>
+              <option value="pending">Pending</option>
+              <option value="assigned">Assigned</option>
+              <option value="accepted">Accepted</option>
+              <option value="in_progress">In Progress</option>
+              <option value="review">Review</option>
+            </select>
+          </div>
+          <div class="content-panel-body" style="padding:0;overflow-x:auto">
+            <div id="queue-wrap" style="padding:1.25rem 1.4rem"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <footer class="site-footer">
+        <div class="container footer-inner">
+          <p>© <span id="year"></span> UniAssist · ASCES Department</p>
+        </div>
+        <div class="container footer-credit-row">
+          <div class="webverse-credit">
+            <span>Developed by</span>
+            <div class="webverse-credit-img-wrap">
+              <img src="../img/webverse-logo-color.png" alt="WebVerse" />
+            </div>
+          </div>
+        </div>
+      </footer>
+
     </div>
-  </footer>
+  </div>
 
   <script src="../js/main.js?v=5"></script>
   <script type="module">
     import { supabase, requireAdmin } from '../js/lib/supabase.js';
-    import { badge, timeAgo, fmtDate, buildNavbar, escHtml } from '../js/lib/ui.js';
+    import { badge, timeAgo, fmtDate, escHtml } from '../js/lib/ui.js';
     import { startSessionTimer } from '../js/lib/session.js';
 
     let allRequests = [];
@@ -102,12 +177,27 @@
         const { user, profile } = auth;
 
         const firstName = profile.full_name?.split(' ')[0] ?? '';
-        document.getElementById('greeting').textContent = `Good day, ${firstName}`;
-        document.getElementById('year').textContent = new Date().getFullYear();
+        const initials  = profile.full_name?.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase() ?? '?';
+        const isSuperAdmin = profile.role === 'super_admin';
 
-        buildNavbar({ role: 'admin', name: profile.full_name, userId: user.id, active: 'queue', basePath: '../', isSuperAdmin: profile.role === 'super_admin' });
-        document.getElementById('app-main').classList.add('ready');
+        document.getElementById('greeting').textContent = `Good day, ${firstName}`;
+        document.getElementById('sidebar-name').textContent = profile.full_name ?? '';
+        document.getElementById('sidebar-avatar').textContent = initials;
+        document.getElementById('sidebar-role').textContent = isSuperAdmin ? 'Super Admin' : 'Admin';
+        document.getElementById('year').textContent = new Date().getFullYear();
+        if (isSuperAdmin) {
+          document.getElementById('role-label').textContent = 'Super Admin';
+          document.getElementById('super-link').style.display = 'flex';
+        }
+
+        setupSidebar();
+        document.getElementById('signout-btn').addEventListener('click', async () => {
+          await supabase.auth.signOut();
+          window.location.href = 'login.html';
+        });
+
         startSessionTimer('login.html');
+        document.getElementById('app-content').classList.add('ready');
 
         await loadQueue();
         subscribeRealtime();
@@ -119,9 +209,16 @@
       }
     }
 
+    function setupSidebar() {
+      const toggle  = document.getElementById('sidebar-toggle');
+      const overlay = document.getElementById('sidebar-overlay');
+      toggle?.addEventListener('click', () => document.body.classList.add('sidebar-open-app'));
+      overlay?.addEventListener('click', () => document.body.classList.remove('sidebar-open-app'));
+    }
+
     async function loadQueue() {
       const wrap = document.getElementById('queue-wrap');
-      wrap.innerHTML = `<p style="color:var(--muted);padding:0.5rem 0">Loading requests…</p>`;
+      wrap.innerHTML = `<p style="color:var(--muted);font-size:0.9rem">Loading requests…</p>`;
 
       const { data, error } = await supabase
         .from('requests')
@@ -135,7 +232,6 @@
 
       if (error) {
         wrap.innerHTML = `<div class="form-error">Could not load queue. Please refresh.</div>`;
-        console.error('loadQueue error:', error);
         return;
       }
 
@@ -164,12 +260,10 @@
 
       wrap.innerHTML = `
         <table class="req-table">
-          <thead>
-            <tr>
-              <th>Student</th><th>Request</th><th>Deadline</th>
-              <th>Assigned to</th><th>Status</th><th>When</th><th></th>
-            </tr>
-          </thead>
+          <thead><tr>
+            <th>Student</th><th>Request</th><th>Deadline</th>
+            <th>Assigned to</th><th>Status</th><th>When</th><th></th>
+          </tr></thead>
           <tbody>
             ${rows.map(r => `
               <tr>
@@ -185,7 +279,7 @@
                 <td>${r.assigned_to ? escHtml(r.assigned_to.full_name) : '<span style="color:var(--muted)">Unassigned</span>'}</td>
                 <td>${badge(r.status)}</td>
                 <td style="white-space:nowrap">${timeAgo(r.created_at)}</td>
-                <td><a href="request.html?id=${r.id}" style="font-weight:600;white-space:nowrap">Open →</a></td>
+                <td><a href="request.html?id=${r.id}" style="font-weight:600;white-space:nowrap;color:var(--green)">Open →</a></td>
               </tr>`).join('')}
           </tbody>
         </table>`;

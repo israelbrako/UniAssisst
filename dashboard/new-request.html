@@ -125,6 +125,7 @@
   <script type="module">
     import { supabase, requireAuth } from '../js/lib/supabase.js';
     import { buildNavbar } from '../js/lib/ui.js';
+    import { startSessionTimer } from '../js/lib/session.js';
 
     async function init() {
       const auth = await requireAuth('../auth/login.html');
@@ -134,6 +135,7 @@
       if (['admin','super_admin'].includes(profile.role)) { window.location.href = '../admin/index.html'; return; }
       document.getElementById('year').textContent = new Date().getFullYear();
       buildNavbar({ role: 'student', name: profile.full_name, userId: user.id, active: 'new', basePath: '../' });
+      startSessionTimer('../auth/login.html');
 
       document.getElementById('request-form').addEventListener('submit', (e) => handleSubmit(e, user, profile));
     }

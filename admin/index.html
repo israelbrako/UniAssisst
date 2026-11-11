@@ -93,6 +93,7 @@
   <script type="module">
     import { supabase, requireAdmin } from '../js/lib/supabase.js';
     import { badge, timeAgo, fmtDate, buildNavbar, escHtml } from '../js/lib/ui.js';
+    import { startSessionTimer } from '../js/lib/session.js';
 
     let allRequests = [];
 
@@ -108,6 +109,7 @@
 
         buildNavbar({ role: 'admin', name: profile.full_name, userId: user.id, active: 'queue', basePath: '../', isSuperAdmin: profile.role === 'super_admin' });
         document.getElementById('app-main').classList.add('ready');
+        startSessionTimer('login.html');
 
         await loadQueue();
         subscribeRealtime();

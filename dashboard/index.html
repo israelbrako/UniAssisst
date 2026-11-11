@@ -81,6 +81,7 @@
   <script type="module">
     import { supabase, requireAuth } from '../js/lib/supabase.js';
     import { badge, timeAgo, buildNavbar, escHtml } from '../js/lib/ui.js';
+    import { startSessionTimer } from '../js/lib/session.js';
 
     let allRequests = [];
     let currentFilter = 'all';
@@ -100,6 +101,9 @@
         document.getElementById('year').textContent = new Date().getFullYear();
 
         buildNavbar({ role: 'student', name: profile.full_name, userId: user.id, active: 'dashboard', basePath: '../' });
+
+        // Start inactivity timer
+        startSessionTimer('../auth/login.html');
 
         // Show page now that we have the user
         document.getElementById('app-main').classList.add('ready');

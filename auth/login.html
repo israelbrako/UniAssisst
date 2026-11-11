@@ -46,13 +46,8 @@
     const errEl     = document.getElementById('form-error');
     const submitBtn = document.getElementById('submit-btn');
 
-    // If already logged in, redirect
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) return;
-      const profile = await getProfile(user.id).catch(() => null);
-      if (['admin','super_admin'].includes(profile?.role)) window.location.href = '/admin/index.html';
-      else window.location.href = '/dashboard/index.html';
-    });
+    // Don't auto-redirect — user must always sign in manually
+    // (session timeout signs them out, so we never skip the login form)
 
     // Show confirmation success message if redirected from email link
     const hash = new URLSearchParams(window.location.hash.replace('#', '?'));

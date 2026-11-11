@@ -153,6 +153,7 @@
   <script type="module">
     import { supabase, requireAdmin } from '../js/lib/supabase.js';
     import { badge, timeAgo, fmtDate, buildNavbar, escHtml } from '../js/lib/ui.js';
+    import { startSessionTimer } from '../js/lib/session.js';
 
     const reqId = new URLSearchParams(location.search).get('id');
     let currentAdmin  = null;
@@ -165,6 +166,7 @@
 
       document.getElementById('year').textContent = new Date().getFullYear();
       buildNavbar({ role: 'admin', name: auth.profile.full_name, userId: auth.user.id, active: 'queue', basePath: '../', isSuperAdmin: auth.profile.role === 'super_admin' });
+      startSessionTimer('login.html');
 
       if (!reqId) { window.location.href = 'index.html'; return; }
       await loadRequest();

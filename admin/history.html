@@ -81,6 +81,7 @@
   <script type="module">
     import { supabase, requireAdmin } from '../js/lib/supabase.js';
     import { badge, timeAgo, fmtDate, buildNavbar, escHtml } from '../js/lib/ui.js';
+    import { startSessionTimer } from '../js/lib/session.js';
 
     let allRows = [];
 
@@ -91,6 +92,7 @@
 
       document.getElementById('year').textContent = new Date().getFullYear();
       buildNavbar({ role: 'admin', name: profile.full_name, userId: user.id, active: 'history', basePath: '../', isSuperAdmin: profile.role === 'super_admin' });
+      startSessionTimer('login.html');
 
       await loadHistory();
 

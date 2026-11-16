@@ -254,7 +254,8 @@ function showProfileModal(supabase, user, profile) {
         if (i === 2 && bio)       dot.classList.add('done');
       });
 
-      setTimeout(() => modal.remove(), 1200);
+      // Reload page so sidebar reflects new avatar/name
+      setTimeout(() => { modal.remove(); location.reload(); }, 1200);
 
     } catch (err) {
       statusEl.className = 'pm-status';

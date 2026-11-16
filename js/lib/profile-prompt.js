@@ -15,12 +15,21 @@ export async function checkProfileCompletion(supabase, user, profile) {
   // Only for students
   if (profile.role !== 'student') return;
 
-  // Don't show again if skipped this session
-  if (sessionStorage.getItem(SKIP_KEY)) return;
+  // Re-fetch the latest profile so we don't rely on cached data
+  const { data: fresh } = await supabase
+    .from('profiles')
+    .select('phone, avatar_url, bio')
+    .eq('id', user.id)
+    .single();
 
-  // Check if profile is complete (has phone + either avatar or bio)
-  const isComplete = profile.phone && (profile.avatar_url || profile.bio);
+  const p = fresh ?? profile;
+
+  // Complete = has a phone number (minimum requirement)
+  const isComplete = !!p.phone;
   if (isComplete) return;
+
+  // Don't show if already dismissed this session
+  if (sessionStorage.getItem(SKIP_KEY)) return;
 
   showProfileModal(supabase, user, profile);
 }

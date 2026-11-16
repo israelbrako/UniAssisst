@@ -216,15 +216,14 @@ function showProfileModal(supabase, user, profile) {
         avatarUrl = publicUrl + '?t=' + Date.now(); // cache bust
       }
 
-      const { error: updateErr } = await supabase.from('profiles').upsert({
-        id: user.id,
-        full_name:  profile.full_name,
-        email:      profile.email,
-        phone,
-        bio:        bio || null,
-        avatar_url: avatarUrl,
-        role:       'student',
-      }, { onConflict: 'id' });
+      const { error: updateErr } = await supabase.from('profiles')
+        .update({
+          phone,
+          bio:        bio || null,
+          avatar_url: avatarUrl,
+          full_name:  profile.full_name,
+        })
+        .eq('id', user.id);
 
       if (updateErr) throw updateErr;
 

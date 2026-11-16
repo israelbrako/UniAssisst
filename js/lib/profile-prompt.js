@@ -199,33 +199,41 @@ function showProfileModal(supabase, user, profile) {
     try {
       let avatarUrl = profile.avatar_url ?? null;
 
-      // Upload avatar if a new file was chosen
+      // Upload avatar if a new file was chosen — skip silently if storage not configured
       if (fileInput.files[0]) {
-        const file = fileInput.files[0];
-        const ext  = file.name.split('.').pop();
-        const path = `${user.id}/avatar.${ext}`;
+        try {
+          const file = fileInput.files[0];
+          const ext  = file.name.split('.').pop();
+          const path = `${user.id}/avatar.${ext}`;
 
-        const { error: upErr } = await supabase.storage
-          .from('avatars')
-          .upload(path, file, { upsert: true });
+          const { error: upErr } = await supabase.storage
+            .from('avatars')
+            .upload(path, file, { upsert: true });
 
-        if (upErr) throw upErr;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('avatars').getPublicUrl(path);
-        avatarUrl = publicUrl + '?t=' + Date.now(); // cache bust
+          if (!upErr) {
+            const { data: { publicUrl } } = supabase.storage
+              .from('avatars').getPublicUrl(path);
+            avatarUrl = publicUrl + '?t=' + Date.now();
+          }
+        } catch (_) {
+          // Avatar upload failed — continue without it
+        }
       }
 
-      const { error: updateErr } = await supabase.from('profiles')
-        .update({
-          phone,
-          bio:        bio || null,
-          avatar_url: avatarUrl,
-          full_name:  profile.full_name,
-        })
+      // Only update columns that definitely exist
+      const updateData = { phone, full_name: profile.full_name };
+      if (bio) updateData.bio = bio;
+      if (avatarUrl) updateData.avatar_url = avatarUrl;
+
+      const { error: updateErr } = await supabase
+        .from('profiles')
+        .update(updateData)
         .eq('id', user.id);
 
-      if (updateErr) throw updateErr;
+      if (updateErr) {
+        console.error('Profile update error:', updateErr);
+        throw updateErr;
+      }
 
       statusEl.className = 'pm-status pm-success';
       statusEl.textContent = '✅ Profile updated!';
@@ -242,6 +250,7 @@ function showProfileModal(supabase, user, profile) {
     } catch (err) {
       statusEl.className = 'pm-status';
       statusEl.textContent = err.message || 'Could not save. Please try again.';
+      console.error('Profile save error:', err);
       saveBtn.textContent = 'Save profile';
       saveBtn.disabled    = false;
     }

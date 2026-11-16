@@ -209,9 +209,10 @@
             ${rows.map(u => `
               <tr>
                 <td><input type="checkbox" class="user-cb"
-                  data-phone="${escHtml(u.phone ?? '')}" data-name="${escHtml(u.full_name ?? '')}"
-                  ${selected.has(u.phone) ? 'checked' : ''}
-                  ${u.phone ? '' : 'disabled title="No phone on file"'} /></td>
+                  data-id="${u.id}"
+                  data-phone="${escHtml(u.phone ?? '')}"
+                  data-name="${escHtml(u.full_name ?? '')}"
+                  ${selected.has(u.id) ? 'checked' : ''} /></td>
                 <td><strong>${escHtml(u.full_name ?? '—')}</strong></td>
                 <td style="font-size:0.82rem">${escHtml(u.email ?? '—')}</td>
                 <td>${u.phone ? escHtml(u.phone) : '<span style="color:var(--muted);font-size:0.78rem">No phone</span>'}</td>
@@ -235,8 +236,8 @@
 
       wrap.querySelectorAll('.user-cb').forEach(cb => {
         cb.addEventListener('change', () => {
-          const phone = cb.dataset.phone;
-          if (cb.checked) selected.add(phone); else selected.delete(phone);
+          const id = cb.dataset.id;
+          if (cb.checked) selected.add(id); else selected.delete(id);
           updateSelectedCount();
         });
       });
@@ -255,7 +256,17 @@
     }
 
     function updateSelectedCount() {
-      document.getElementById('selected-count').textContent = `${selected.size} selected`;
+      // Count how many selected users actually have phone numbers
+      const allUsers = [...allAppUsers, ...allVMUsers];
+      const withPhone = [...selected].filter(id => {
+        const u = allUsers.find(u => u.id === id);
+        return u?.phone;
+      }).length;
+      const total = selected.size;
+      document.getElementById('selected-count').textContent =
+        total === 0 ? '0 selected'
+        : withPhone === total ? `${total} selected`
+        : `${total} selected (${withPhone} have phone numbers)`;
     }
 
     function setupTabs() {
@@ -279,13 +290,14 @@
         let source = currentTab === 'students' ? allAppUsers.filter(u => u.role === 'student')
           : currentTab === 'admins' ? allAppUsers.filter(u => ['admin','super_admin'].includes(u.role))
           : allVMUsers;
-        source.forEach(u => { if (u.phone) selected.add(u.phone); });
+        source.forEach(u => selected.add(u.id));
         renderTable(document.getElementById('search-input').value);
       });
 
       document.getElementById('deselect-all-btn').addEventListener('click', () => {
         selected.clear();
         renderTable(document.getElementById('search-input').value);
+        updateSelectedCount();
       });
 
       document.getElementById('send-sms-btn').addEventListener('click', sendBulkSMS);
@@ -296,15 +308,27 @@
       const statusEl = document.getElementById('sms-status');
       if (!message) { statusEl.textContent = 'Please write a message first.'; statusEl.style.color = '#c0392b'; return; }
       if (selected.size === 0) { statusEl.textContent = 'Please select at least one recipient.'; statusEl.style.color = '#c0392b'; return; }
-      if (!confirm(`Send this SMS to ${selected.size} recipient${selected.size > 1 ? 's' : ''}?\n\n"${message}"`)) return;
+
+      // Resolve selected IDs → phone numbers, skip those without phones
+      const allUsers = [...allAppUsers, ...allVMUsers];
+      const phones = [...selected]
+        .map(id => allUsers.find(u => u.id === id)?.phone)
+        .filter(Boolean);
+
+      if (phones.length === 0) {
+        statusEl.textContent = 'None of the selected users have phone numbers on file.';
+        statusEl.style.color = '#c0392b';
+        return;
+      }
+
+      if (!confirm(`Send this SMS to ${phones.length} recipient${phones.length > 1 ? 's' : ''} with phone numbers?\n\n"${message}"`)) return;
 
       const btn = document.getElementById('send-sms-btn');
       btn.textContent = 'Sending…'; btn.disabled = true;
       statusEl.style.color = 'var(--muted)';
-      statusEl.textContent = `Sending to ${selected.size} recipients…`;
+      statusEl.textContent = `Sending to ${phones.length} recipients…`;
 
       let sent = 0, failed = 0;
-      const phones = [...selected];
 
       for (let i = 0; i < phones.length; i += 10) {
         const batch = phones.slice(i, i + 10);

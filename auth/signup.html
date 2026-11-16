@@ -104,15 +104,15 @@
 
     if (error) return showError(error.message);
 
-      // Create the profile row
+      // Upsert profile row — trigger may have already created it without phone/name
       if (data.user) {
-        await supabase.from('profiles').insert({
+        await supabase.from('profiles').upsert({
           id: data.user.id,
           full_name: fullName,
           email,
           phone,
           role: 'student',
-        });
+        }, { onConflict: 'id' });
       }
 
       // Hide the form, show confirmation notice

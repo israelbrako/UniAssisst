@@ -282,7 +282,7 @@ export function buildSidebar(opts = {}) {
 
     <div class="sidebar-footer">
       <div class="sidebar-user">
-        <div class="sidebar-avatar">${escHtml(initials)}</div>
+        <div class="sidebar-avatar" style="${profile.avatar_url ? `background:url('${profile.avatar_url}') center/cover;color:transparent;` : ''}">${escHtml(initials)}</div>
         <div class="sidebar-user-info">
           <div class="sidebar-user-name">${escHtml(profile.full_name ?? '')}</div>
           <div class="sidebar-user-role">${escHtml(roleLabel)}</div>

@@ -563,3 +563,17 @@ input, textarea, select {
 @media (min-width: 800px) {
   .app-main { padding: 2rem 0 4rem; }
 }
+
+/* ── Webverse credit (public pages) ─────────────────────────── */
+.webverse-credit { display: inline-flex; align-items: center; gap: 0.6rem; text-decoration: none; cursor: default; }
+.webverse-credit span { font-size: 0.82rem; color: rgba(248,248,248,.5); letter-spacing: 0.03em; white-space: nowrap; }
+.webverse-credit-img-wrap {
+  background: #fff; border-radius: 5px;
+  padding: 2px 8px; display: inline-flex; align-items: center;
+  height: 24px;
+}
+.webverse-credit-img-wrap img { height: 15px; width: auto; display: block; }
+.footer-credit-row {
+  display: flex; justify-content: center; align-items: center;
+  padding-top: 0.6rem; border-top: 1px solid rgba(248,248,248,.08); margin-top: 0.6rem;
+}

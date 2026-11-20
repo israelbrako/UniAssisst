@@ -354,8 +354,14 @@ body.sidebar-open-app .app-sidebar { transform: translateX(0) !important; }
 /* ── Webverse credit ─────────────────────────────────────────── */
 .webverse-credit { display: inline-flex; align-items: center; gap: 0.6rem; text-decoration: none; opacity: 0.9; cursor: default; }
 .webverse-credit span { font-size: 0.9rem; color: rgba(248,248,248,.5); letter-spacing: 0.03em; white-space: nowrap; }
-.webverse-credit-img-wrap { background: #fff; border-radius: 6px; padding: 5px 14px; display: inline-flex; align-items: center; height: 34px; }
-.webverse-credit-img-wrap img { height: 22px; width: auto; display: block; }
+.webverse-credit-img-wrap {
+  background: #fff; border-radius: 6px;
+  padding: 3px 10px; display: inline-flex; align-items: center;
+  height: 26px;
+}
+.webverse-credit-img-wrap img {
+  height: 16px; width: auto; display: block;
+}
 .footer-credit-row { display: flex; justify-content: center; align-items: center; padding-top: 0.75rem; border-top: 1px solid rgba(248,248,248,.08); margin-top: 0.75rem; }
 
 /* ── Responsive ──────────────────────────────────────────────── */
